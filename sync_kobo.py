@@ -8,8 +8,8 @@ khu_vuc_nat_map = {
 }
 
 # ====== CẤU HÌNH ======
-FORM_UID = "aDtzYakH7kU6dp7eXncupi"
-API_TOKEN = "update"
+FORM_UID = FORM_UID
+API_TOKEN = API_TOKEN
 
 url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/"
 headers = {
@@ -47,3 +47,4 @@ if response.status_code == 200:
 else:
 
     print("Lỗi khi gọi API:", response.status_code)
+
