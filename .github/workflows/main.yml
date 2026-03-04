@@ -27,10 +27,10 @@ jobs:
           API_TOKEN: ${{ secrets.API_TOKEN }}
         run: python sync_kobo.py
 
-      - name: Commit data.json
+      - name: Commit and push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data.json
-          git commit -m "Auto update data.json" || echo "No changes"
+          git add .
+          git commit -m "Auto update data"
           git push
