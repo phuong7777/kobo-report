@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Báo cáo hồ sơ</title>
+
+<style>
+body { font-family: Arial; margin: 20px; }
+h2 { margin-bottom: 10px; }
+
+.filters { margin-bottom: 15px; }
+
+select, input {
+  padding: 6px;
+  margin-right: 10px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.pagination {
+  margin-top: 15px;
+}
+
+.pagination button {
+  padding: 5px 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>BÁO CÁO DANH SÁCH HỒ SƠ</h2>
+
+<div class="filters">
+  <input type="text" id="search" placeholder="Tìm kiếm...">
+
+  <select id="tinhFilter">
+    <option value="">-- Lọc theo Tỉnh/TP --</option>
+  </select>
+
+  <select id="huyenFilter">
+    <option value="">-- Lọc theo Quận/Huyện --</option>
+  </select>
+</div>
+
+<table id="dataTable"></table>
+
+<div class="pagination">
+  <button onclick="prevPage()">Trang trước</button>
+  <span id="pageInfo"></span>
+  <button onclick="nextPage()">Trang sau</button>
+</div>
+
+<script>
+let allData = [];
+let filteredData = [];
+let currentPage = 1;
+let rowsPerPage = 10;
+
+fetch("data.json")
+.then(res => res.json())
+.then(data => {
+    allData = data;
+    filteredData = data;
+    populateTinhFilter();
+    renderTable();
+});
+
+function populateTinhFilter(){
+    let tinhSet = [...new Set(allData.map(d => d.tinh_tp).filter(Boolean))];
+    let select = document.getElementById("tinhFilter");
+
+    tinhSet.forEach(tinh=>{
+        let option = document.createElement("option");
+        option.value = tinh;
+        option.textContent = tinh;
+        select.appendChild(option);
+    });
+}
+
+function populateHuyenFilter(tinh){
+    let huyenSelect = document.getElementById("huyenFilter");
+    huyenSelect.innerHTML = '<option value="">-- Lọc theo Quận/Huyện --</option>';
+
+    let huyenSet = [...new Set(
+        allData
+        .filter(d => !tinh || d.tinh_tp === tinh)
+        .map(d => d.quan_huyen)
+        .filter(Boolean)
+    )];
+
+    huyenSet.forEach(huyen=>{
+        let option = document.createElement("option");
+        option.value = huyen;
+        option.textContent = huyen;
+        huyenSelect.appendChild(option);
+    });
+}
+
+function renderTable(){
+    let start = (currentPage - 1) * rowsPerPage;
+    let end = start + rowsPerPage;
+    let pageData = filteredData.slice(start, end);
+
+    let html = `
+    <tr>
+        <th>Mã hồ sơ</th>
+        <th>Khu vực</th>
+        <th>Tỉnh/TP</th>
+        <th>Quận/Huyện</th>
+        <th>Xã/Phường</th>
+        <th>Thôn/Ấp</th>
+        <th>Họ tên chủ hộ</th>
+        <th>Địa chỉ</th>
+        <th>Điện thoại</th>
+        <th>Ngày nộp</th>
+    </tr>`;
+
+    pageData.forEach(row=>{
+        html += `
+        <tr>
+            <td>${row.id_ho_so || ""}</td>
+            <td>${row.khu_vuc_nat || ""}</td>
+            <td>${row.tinh_tp || ""}</td>
+            <td>${row.quan_huyen || ""}</td>
+            <td>${row.xa_phuong || ""}</td>
+            <td>${row.thon_ap || ""}</td>
+            <td>${row.chuho_ten_001 || ""}</td>
+            <td>${row.chuho_dia_chi || ""}</td>
+            <td>${row.chuho_dien_thoai || ""}</td>
+            <td>${row.submission_time || ""}</td>
+        </tr>`;
+    });
+
+    document.getElementById("dataTable").innerHTML = html;
+
+    document.getElementById("pageInfo").innerText =
+        "Trang " + currentPage + "/" + Math.ceil(filteredData.length / rowsPerPage);
+}
+
+document.getElementById("search").addEventListener("input", function(e){
+    applyFilters();
+});
+
+document.getElementById("tinhFilter").addEventListener("change", function(e){
+    populateHuyenFilter(e.target.value);
+    applyFilters();
+});
+
+document.getElementById("huyenFilter").addEventListener("change", function(){
+    applyFilters();
+});
+
+function applyFilters(){
+    let keyword = document.getElementById("search").value.toLowerCase();
+    let tinh = document.getElementById("tinhFilter").value;
+    let huyen = document.getElementById("huyenFilter").value;
+
+    filteredData = allData.filter(row => {
+        let matchKeyword = Object.values(row).join(" ").toLowerCase().includes(keyword);
+        let matchTinh = !tinh || row.tinh_tp === tinh;
+        let matchHuyen = !huyen || row.quan_huyen === huyen;
+
+        return matchKeyword && matchTinh && matchHuyen;
+    });
+
+    currentPage = 1;
+    renderTable();
+}
+
+function nextPage(){
+    if(currentPage < Math.ceil(filteredData.length / rowsPerPage)){
+        currentPage++;
+        renderTable();
+    }
+}
+
+function prevPage(){
+    if(currentPage > 1){
+        currentPage--;
+        renderTable();
+    }
+}
+</script>
+
+</body>
+</html>
