@@ -1,0 +1,36 @@
+name: Sync Kobo Data
+
+on:
+  schedule:
+    - cron: "0 1 * * *"   # Chạy 1h sáng mỗi ngày (UTC)
+  workflow_dispatch:      # Cho phép bấm chạy tay
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests pandas openpyxl
+
+      - name: Run sync script
+        env:
+          FORM_UID: ${{ secrets.FORM_UID }}
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+        run: python sync_kobo.py
+
+      - name: Commit data.json
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data.json
+          git commit -m "Auto update data.json" || echo "No changes"
+          git push
