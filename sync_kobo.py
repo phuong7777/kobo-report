@@ -29,6 +29,9 @@ if response.status_code == 200:
     fields_df = pd.read_excel("fields.xlsx")
     fields = fields_df.to_dict(orient="records")
 
+    # Lưu metadata cho frontend
+    metadata = {f["field_output"]: f["display_name"] for f in fields} 
+
     selected_data = []
 
     for row in data:
@@ -58,3 +61,4 @@ if response.status_code == 200:
 
 else:
     print("Lỗi khi gọi API:", response.status_code)
+
