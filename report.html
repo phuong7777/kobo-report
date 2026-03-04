@@ -4,11 +4,8 @@
 <meta charset="UTF-8">
 <title>Kobo Dashboard</title>
 
-<!-- SheetJS -->
+<!-- Excel export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
@@ -20,8 +17,6 @@ body {
 h2 { margin-bottom:10px; }
 
 .dashboard {
-    display:flex;
-    gap:20px;
     margin-bottom:20px;
 }
 
@@ -30,6 +25,7 @@ h2 { margin-bottom:10px; }
     padding:15px 20px;
     border-radius:10px;
     box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    display:inline-block;
     min-width:150px;
 }
 
@@ -67,9 +63,7 @@ button {
     border-radius:4px;
 }
 
-button:hover {
-    opacity:0.9;
-}
+button:hover { opacity:0.9; }
 
 table {
     border-collapse: collapse;
@@ -82,22 +76,32 @@ th, td {
     border:1px solid #eee;
     padding:6px;
     font-size:13px;
+    position:relative;
 }
 
 th {
     background:#f2f2f2;
 }
 
+.hide-btn {
+    position:absolute;
+    right:5px;
+    top:5px;
+    font-size:12px;
+    cursor:pointer;
+    color:#999;
+}
+
+.hide-btn:hover {
+    color:red;
+}
+
 .pagination {
     margin-top:10px;
 }
 
-#columnToggle {
-    background:white;
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:15px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+.hidden-col {
+    display:none;
 }
 </style>
 </head>
@@ -113,10 +117,6 @@ th {
     </div>
 </div>
 
-<canvas id="provinceChart" height="100"></canvas>
-
-<br>
-
 <div class="controls">
 <input type="text" id="searchInput" placeholder="Tìm kiếm...">
 <select id="provinceFilter"></select>
@@ -124,8 +124,6 @@ th {
 <button onclick="resetFilter()">Reset</button>
 <button onclick="exportExcel()">Xuất Excel</button>
 </div>
-
-<div id="columnToggle"></div>
 
 <table>
 <thead id="tableHead"></thead>
@@ -143,10 +141,9 @@ th {
 let fullData = [];
 let filteredData = [];
 let columnsMeta = {};
-let visibleColumns = [];
+let hiddenColumns = new Set();
 let currentPage = 1;
 let rowsPerPage = 10;
-let chartInstance = null;
 
 Promise.all([
 fetch("data.json").then(res => res.json()),
@@ -157,11 +154,9 @@ fullData = data;
 filteredData = data;
 columnsMeta = meta;
 
-initColumnToggle();
 initFilters();
 renderTable();
 updateSummary();
-drawChart();
 });
 
 function initFilters() {
@@ -201,7 +196,6 @@ String(val ?? "").toLowerCase().includes(search))
 currentPage = 1;
 renderTable();
 updateSummary();
-drawChart();
 }
 
 function renderTable() {
@@ -211,30 +205,54 @@ tableBody.innerHTML = "";
 
 if (filteredData.length === 0) return;
 
-const columns = visibleColumns;
+const columns = Object.keys(columnsMeta);
 
 let headerRow = "<tr>";
-columns.forEach(col =>
-headerRow += `<th>${columnsMeta[col] || col}</th>`
-);
-headerRow += "</tr>";
 
+columns.forEach((col, index) => {
+
+const hidden = hiddenColumns.has(col) ? "hidden-col" : "";
+
+headerRow += `
+<th class="${hidden}" data-col="${col}">
+${columnsMeta[col] || col}
+<span class="hide-btn" onclick="toggleColumn('${col}')">👁</span>
+</th>`;
+});
+
+headerRow += "</tr>";
 tableHead.innerHTML = headerRow;
 
 const start = (currentPage - 1) * rowsPerPage;
 const pageData = filteredData.slice(start, start + rowsPerPage);
 
 pageData.forEach(row => {
+
 let rowHTML = "<tr>";
-columns.forEach(col =>
-rowHTML += `<td>${row[col] ?? ""}</td>`
-);
+
+columns.forEach(col => {
+
+const hidden = hiddenColumns.has(col) ? "hidden-col" : "";
+
+rowHTML += `<td class="${hidden}">${row[col] ?? ""}</td>`;
+});
+
 rowHTML += "</tr>";
 tableBody.innerHTML += rowHTML;
 });
 
 pageInfo.innerText =
 `Trang ${currentPage} / ${Math.ceil(filteredData.length / rowsPerPage)}`;
+}
+
+function toggleColumn(col) {
+
+if (hiddenColumns.has(col))
+hiddenColumns.delete(col);
+else
+hiddenColumns.add(col);
+
+renderTable();
 }
 
 function nextPage() {
@@ -263,36 +281,16 @@ filteredData = fullData;
 currentPage = 1;
 renderTable();
 updateSummary();
-drawChart();
-}
-
-function initColumnToggle() {
-visibleColumns = Object.keys(columnsMeta);
-columnToggle.innerHTML = "<b>Hiển thị cột:</b><br>";
-
-visibleColumns.forEach(col => {
-columnToggle.innerHTML += `
-<label style="margin-right:10px">
-<input type="checkbox" value="${col}" checked onchange="toggleColumn(this)">
-${columnsMeta[col]}
-</label>`;
-});
-}
-
-function toggleColumn(cb) {
-if (cb.checked)
-visibleColumns.push(cb.value);
-else
-visibleColumns = visibleColumns.filter(c => c !== cb.value);
-
-renderTable();
 }
 
 function exportExcel() {
 
+const columns = Object.keys(columnsMeta)
+.filter(col => !hiddenColumns.has(col));
+
 const dataToExport = filteredData.map(row => {
 let newRow = {};
-visibleColumns.forEach(col =>
+columns.forEach(col =>
 newRow[columnsMeta[col]] = row[col]
 );
 return newRow;
@@ -302,31 +300,6 @@ const worksheet = XLSX.utils.json_to_sheet(dataToExport);
 const workbook = XLSX.utils.book_new();
 XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
 XLSX.writeFile(workbook, "kobo_report.xlsx");
-}
-
-function drawChart() {
-
-if (chartInstance) chartInstance.destroy();
-
-const counts = {};
-
-filteredData.forEach(row => {
-const province = row.tinh_tp || "Không rõ";
-counts[province] = (counts[province] || 0) + 1;
-});
-
-const ctx = document.getElementById("provinceChart");
-
-chartInstance = new Chart(ctx, {
-type: 'bar',
-data: {
-labels: Object.keys(counts),
-datasets: [{
-label: 'Số hồ sơ',
-data: Object.values(counts)
-}]
-}
-});
 }
 
 </script>
