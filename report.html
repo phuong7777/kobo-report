@@ -150,8 +150,8 @@ let currentPage = 1;
 let rowsPerPage = 10;
 
 Promise.all([
-fetch("data.json").then(res => res.json()),
-fetch("columns.json").then(res => res.json())
+fetch("data.json?v=" + new Date().getTime()).then(res => res.json()),
+fetch("columns.json?v=" + new Date().getTime()).then(res => res.json())
 ]).then(([data, meta]) => {
 
 fullData = data;
@@ -383,3 +383,4 @@ XLSX.writeFile(workbook, "kobo_report.xlsx");
 
 </body>
 </html>
+
