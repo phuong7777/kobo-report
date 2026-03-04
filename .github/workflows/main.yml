@@ -2,7 +2,7 @@ name: Sync Kobo Data
 
 on:
   schedule:
-    - cron: "0 1 * * *"   # Chạy 1h sáng mỗi ngày (UTC)
+  - cron: '0 */1 * * *'
   workflow_dispatch:      # Cho phép bấm chạy tay
 
 jobs:
