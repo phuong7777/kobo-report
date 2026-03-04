@@ -55,7 +55,8 @@ fetch("columns.json").then(res => res.json())
 fullData = data;
 filteredData = data;
 columnsMeta = meta;
-
+  
+initColumnToggle();
 initFilters();
 renderTable();
 updateSummary();
@@ -115,7 +116,7 @@ tableBody.innerHTML = "";
 
 if (filteredData.length === 0) return;
 
-const columns = Object.keys(filteredData[0]);
+const columns = visibleColumns;
 
 let headerRow = "<tr>";
 columns.forEach(col => {
@@ -170,7 +171,38 @@ renderTable();
 updateSummary();
 }
 
+let visibleColumns = [];
+
+function initColumnToggle() {
+
+visibleColumns = Object.keys(columnsMeta);
+
+const container = document.getElementById("columnToggle");
+container.innerHTML = "<b>Hiển thị cột:</b><br>";
+
+visibleColumns.forEach(col => {
+container.innerHTML += `
+<label style="margin-right:10px">
+<input type="checkbox" value="${col}" checked onchange="toggleColumn(this)">
+${columnsMeta[col]}
+</label>
+`;
+});
+}
+
+function toggleColumn(checkbox) {
+
+if (checkbox.checked) {
+visibleColumns.push(checkbox.value);
+} else {
+visibleColumns = visibleColumns.filter(c => c !== checkbox.value);
+}
+
+renderTable();
+}
+  
 </script>
 </body>
 </html>
+
 
