@@ -3,31 +3,130 @@
 <head>
 <meta charset="UTF-8">
 <title>Kobo Dashboard</title>
+
+<!-- SheetJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body { font-family: Arial; padding:20px; }
-h2 { margin-bottom:5px; }
-.controls { margin-bottom:15px; }
-table { border-collapse: collapse; width:100%; }
-th, td { border:1px solid #ddd; padding:6px; font-size:13px; }
-th { background:#f2f2f2; }
-.pagination { margin-top:10px; }
-button { padding:5px 10px; margin-right:5px; }
+body {
+    font-family: 'Segoe UI', Arial;
+    background:#f4f6f9;
+    padding:20px;
+}
+
+h2 { margin-bottom:10px; }
+
+.dashboard {
+    display:flex;
+    gap:20px;
+    margin-bottom:20px;
+}
+
+.card {
+    background:white;
+    padding:15px 20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    min-width:150px;
+}
+
+.card h3 {
+    margin:0;
+    font-size:14px;
+    color:#777;
+}
+
+.card .number {
+    font-size:22px;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.controls {
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom:15px;
+}
+
+select, input, button {
+    padding:6px;
+    margin-right:8px;
+    margin-bottom:5px;
+}
+
+button {
+    cursor:pointer;
+    background:#4CAF50;
+    color:white;
+    border:none;
+    border-radius:4px;
+}
+
+button:hover {
+    opacity:0.9;
+}
+
+table {
+    border-collapse: collapse;
+    width:100%;
+    background:white;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+th, td {
+    border:1px solid #eee;
+    padding:6px;
+    font-size:13px;
+}
+
+th {
+    background:#f2f2f2;
+}
+
+.pagination {
+    margin-top:10px;
+}
+
+#columnToggle {
+    background:white;
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:15px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
 </style>
 </head>
+
 <body>
 
-<h2>Báo cáo dữ liệu Kobo</h2>
-<div id="summary"></div>
+<h2>Kobo Dashboard</h2>
+
+<div class="dashboard">
+    <div class="card">
+        <h3>Tổng hồ sơ</h3>
+        <div class="number" id="totalCount">0</div>
+    </div>
+</div>
+
+<canvas id="provinceChart" height="100"></canvas>
+
+<br>
 
 <div class="controls">
 <input type="text" id="searchInput" placeholder="Tìm kiếm...">
 <select id="provinceFilter"></select>
 <select id="districtFilter"></select>
 <button onclick="resetFilter()">Reset</button>
+<button onclick="exportExcel()">Xuất Excel</button>
 </div>
 
-<div id="columnToggle" style="margin-bottom:15px;"></div>
-  
+<div id="columnToggle"></div>
+
 <table>
 <thead id="tableHead"></thead>
 <tbody id="tableBody"></tbody>
@@ -44,8 +143,10 @@ button { padding:5px 10px; margin-right:5px; }
 let fullData = [];
 let filteredData = [];
 let columnsMeta = {};
+let visibleColumns = [];
 let currentPage = 1;
 let rowsPerPage = 10;
+let chartInstance = null;
 
 Promise.all([
 fetch("data.json").then(res => res.json()),
@@ -55,11 +156,12 @@ fetch("columns.json").then(res => res.json())
 fullData = data;
 filteredData = data;
 columnsMeta = meta;
-  
+
 initColumnToggle();
 initFilters();
 renderTable();
 updateSummary();
+drawChart();
 });
 
 function initFilters() {
@@ -67,49 +169,42 @@ function initFilters() {
 const provinces = [...new Set(fullData.map(d => d.tinh_tp).filter(Boolean))];
 const districts = [...new Set(fullData.map(d => d.quan_huyen).filter(Boolean))];
 
-const provinceSelect = document.getElementById("provinceFilter");
-const districtSelect = document.getElementById("districtFilter");
+provinceFilter.innerHTML = '<option value="">Tất cả tỉnh</option>';
+districtFilter.innerHTML = '<option value="">Tất cả quận</option>';
 
-provinceSelect.innerHTML = '<option value="">Tất cả tỉnh</option>';
-districtSelect.innerHTML = '<option value="">Tất cả quận</option>';
+provinces.sort().forEach(p =>
+provinceFilter.innerHTML += `<option value="${p}">${p}</option>`
+);
 
-provinces.sort().forEach(p => {
-provinceSelect.innerHTML += `<option value="${p}">${p}</option>`;
-});
+districts.sort().forEach(d =>
+districtFilter.innerHTML += `<option value="${d}">${d}</option>`
+);
 
-districts.sort().forEach(d => {
-districtSelect.innerHTML += `<option value="${d}">${d}</option>`;
-});
-
-provinceSelect.onchange = applyFilters;
-districtSelect.onchange = applyFilters;
-document.getElementById("searchInput").oninput = applyFilters;
+provinceFilter.onchange = applyFilters;
+districtFilter.onchange = applyFilters;
+searchInput.oninput = applyFilters;
 }
 
 function applyFilters() {
 
-const search = document.getElementById("searchInput").value.toLowerCase();
-const province = document.getElementById("provinceFilter").value;
-const district = document.getElementById("districtFilter").value;
+const search = searchInput.value.toLowerCase();
+const province = provinceFilter.value;
+const district = districtFilter.value;
 
-filteredData = fullData.filter(row => {
-
-return (!province || row.tinh_tp === province)
+filteredData = fullData.filter(row =>
+(!province || row.tinh_tp === province)
 && (!district || row.quan_huyen === district)
 && Object.values(row).some(val =>
-String(val ?? "").toLowerCase().includes(search)
+String(val ?? "").toLowerCase().includes(search))
 );
-});
 
 currentPage = 1;
 renderTable();
 updateSummary();
+drawChart();
 }
 
 function renderTable() {
-
-const tableHead = document.getElementById("tableHead");
-const tableBody = document.getElementById("tableBody");
 
 tableHead.innerHTML = "";
 tableBody.innerHTML = "";
@@ -119,9 +214,9 @@ if (filteredData.length === 0) return;
 const columns = visibleColumns;
 
 let headerRow = "<tr>";
-columns.forEach(col => {
-headerRow += `<th>${columnsMeta[col] || col}</th>`;
-});
+columns.forEach(col =>
+headerRow += `<th>${columnsMeta[col] || col}</th>`
+);
 headerRow += "</tr>";
 
 tableHead.innerHTML = headerRow;
@@ -131,14 +226,14 @@ const pageData = filteredData.slice(start, start + rowsPerPage);
 
 pageData.forEach(row => {
 let rowHTML = "<tr>";
-columns.forEach(col => {
-rowHTML += `<td>${row[col] ?? ""}</td>`;
-});
+columns.forEach(col =>
+rowHTML += `<td>${row[col] ?? ""}</td>`
+);
 rowHTML += "</tr>";
 tableBody.innerHTML += rowHTML;
 });
 
-document.getElementById("pageInfo").innerText =
+pageInfo.innerText =
 `Trang ${currentPage} / ${Math.ceil(filteredData.length / rowsPerPage)}`;
 }
 
@@ -157,52 +252,84 @@ renderTable();
 }
 
 function updateSummary() {
-document.getElementById("summary").innerHTML =
-`Tổng số hồ sơ: <b>${filteredData.length}</b>`;
+totalCount.innerText = filteredData.length;
 }
 
 function resetFilter() {
-document.getElementById("searchInput").value = "";
-document.getElementById("provinceFilter").value = "";
-document.getElementById("districtFilter").value = "";
+searchInput.value = "";
+provinceFilter.value = "";
+districtFilter.value = "";
 filteredData = fullData;
 currentPage = 1;
 renderTable();
 updateSummary();
+drawChart();
 }
 
-let visibleColumns = [];
-
 function initColumnToggle() {
-
 visibleColumns = Object.keys(columnsMeta);
-
-const container = document.getElementById("columnToggle");
-container.innerHTML = "<b>Hiển thị cột:</b><br>";
+columnToggle.innerHTML = "<b>Hiển thị cột:</b><br>";
 
 visibleColumns.forEach(col => {
-container.innerHTML += `
+columnToggle.innerHTML += `
 <label style="margin-right:10px">
 <input type="checkbox" value="${col}" checked onchange="toggleColumn(this)">
 ${columnsMeta[col]}
-</label>
-`;
+</label>`;
 });
 }
 
-function toggleColumn(checkbox) {
-
-if (checkbox.checked) {
-visibleColumns.push(checkbox.value);
-} else {
-visibleColumns = visibleColumns.filter(c => c !== checkbox.value);
-}
+function toggleColumn(cb) {
+if (cb.checked)
+visibleColumns.push(cb.value);
+else
+visibleColumns = visibleColumns.filter(c => c !== cb.value);
 
 renderTable();
 }
-  
+
+function exportExcel() {
+
+const dataToExport = filteredData.map(row => {
+let newRow = {};
+visibleColumns.forEach(col =>
+newRow[columnsMeta[col]] = row[col]
+);
+return newRow;
+});
+
+const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+const workbook = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+XLSX.writeFile(workbook, "kobo_report.xlsx");
+}
+
+function drawChart() {
+
+if (chartInstance) chartInstance.destroy();
+
+const counts = {};
+
+filteredData.forEach(row => {
+const province = row.tinh_tp || "Không rõ";
+counts[province] = (counts[province] || 0) + 1;
+});
+
+const ctx = document.getElementById("provinceChart");
+
+chartInstance = new Chart(ctx, {
+type: 'bar',
+data: {
+labels: Object.keys(counts),
+datasets: [{
+label: 'Số hồ sơ',
+data: Object.values(counts)
+}]
+}
+});
+}
+
 </script>
+
 </body>
 </html>
-
-
