@@ -2,200 +2,172 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Báo cáo hồ sơ</title>
-
+<title>Kobo Dashboard</title>
 <style>
-body { font-family: Arial; margin: 20px; }
-h2 { margin-bottom: 10px; }
-
-.filters { margin-bottom: 15px; }
-
-select, input {
-  padding: 6px;
-  margin-right: 10px;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  font-size: 13px;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 6px;
-  text-align: left;
-}
-
-th {
-  background-color: #f2f2f2;
-}
-
-.pagination {
-  margin-top: 15px;
-}
-
-.pagination button {
-  padding: 5px 10px;
-}
+body { font-family: Arial; padding:20px; }
+h2 { margin-bottom:5px; }
+.controls { margin-bottom:15px; }
+table { border-collapse: collapse; width:100%; }
+th, td { border:1px solid #ddd; padding:6px; font-size:13px; }
+th { background:#f2f2f2; }
+.pagination { margin-top:10px; }
+button { padding:5px 10px; margin-right:5px; }
 </style>
 </head>
-
 <body>
 
-<h2>BÁO CÁO DANH SÁCH HỒ SƠ</h2>
+<h2>Báo cáo dữ liệu Kobo</h2>
+<div id="summary"></div>
 
-<div class="filters">
-  <input type="text" id="search" placeholder="Tìm kiếm...">
-
-  <select id="tinhFilter">
-    <option value="">-- Lọc theo Tỉnh/TP --</option>
-  </select>
-
-  <select id="huyenFilter">
-    <option value="">-- Lọc theo Quận/Huyện --</option>
-  </select>
+<div class="controls">
+<input type="text" id="searchInput" placeholder="Tìm kiếm...">
+<select id="provinceFilter"></select>
+<select id="districtFilter"></select>
+<button onclick="resetFilter()">Reset</button>
 </div>
 
-<table id="dataTable"></table>
+<table>
+<thead id="tableHead"></thead>
+<tbody id="tableBody"></tbody>
+</table>
 
 <div class="pagination">
-  <button onclick="prevPage()">Trang trước</button>
-  <span id="pageInfo"></span>
-  <button onclick="nextPage()">Trang sau</button>
+<button onclick="prevPage()">Prev</button>
+<span id="pageInfo"></span>
+<button onclick="nextPage()">Next</button>
 </div>
 
 <script>
-let allData = [];
+
+let fullData = [];
 let filteredData = [];
+let columnsMeta = {};
 let currentPage = 1;
 let rowsPerPage = 10;
 
-fetch("data.json")
-.then(res => res.json())
-.then(data => {
-    allData = data;
-    filteredData = data;
-    populateTinhFilter();
-    renderTable();
+Promise.all([
+fetch("data.json").then(res => res.json()),
+fetch("columns.json").then(res => res.json())
+]).then(([data, meta]) => {
+
+fullData = data;
+filteredData = data;
+columnsMeta = meta;
+
+initFilters();
+renderTable();
+updateSummary();
 });
 
-function populateTinhFilter(){
-    let tinhSet = [...new Set(allData.map(d => d.tinh_tp).filter(Boolean))];
-    let select = document.getElementById("tinhFilter");
+function initFilters() {
 
-    tinhSet.forEach(tinh=>{
-        let option = document.createElement("option");
-        option.value = tinh;
-        option.textContent = tinh;
-        select.appendChild(option);
-    });
-}
+const provinces = [...new Set(fullData.map(d => d.tinh_tp).filter(Boolean))];
+const districts = [...new Set(fullData.map(d => d.quan_huyen).filter(Boolean))];
 
-function populateHuyenFilter(tinh){
-    let huyenSelect = document.getElementById("huyenFilter");
-    huyenSelect.innerHTML = '<option value="">-- Lọc theo Quận/Huyện --</option>';
+const provinceSelect = document.getElementById("provinceFilter");
+const districtSelect = document.getElementById("districtFilter");
 
-    let huyenSet = [...new Set(
-        allData
-        .filter(d => !tinh || d.tinh_tp === tinh)
-        .map(d => d.quan_huyen)
-        .filter(Boolean)
-    )];
+provinceSelect.innerHTML = '<option value="">Tất cả tỉnh</option>';
+districtSelect.innerHTML = '<option value="">Tất cả quận</option>';
 
-    huyenSet.forEach(huyen=>{
-        let option = document.createElement("option");
-        option.value = huyen;
-        option.textContent = huyen;
-        huyenSelect.appendChild(option);
-    });
-}
-
-function renderTable(){
-    let start = (currentPage - 1) * rowsPerPage;
-    let end = start + rowsPerPage;
-    let pageData = filteredData.slice(start, end);
-
-    let html = `
-    <tr>
-        <th>Mã hồ sơ</th>
-        <th>Khu vực</th>
-        <th>Tỉnh/TP</th>
-        <th>Quận/Huyện</th>
-        <th>Xã/Phường</th>
-        <th>Thôn/Ấp</th>
-        <th>Họ tên chủ hộ</th>
-        <th>Địa chỉ</th>
-        <th>Điện thoại</th>
-        <th>Ngày nộp</th>
-    </tr>`;
-
-    pageData.forEach(row=>{
-        html += `
-        <tr>
-            <td>${row.id_ho_so || ""}</td>
-            <td>${row.khu_vuc_nat || ""}</td>
-            <td>${row.tinh_tp || ""}</td>
-            <td>${row.quan_huyen || ""}</td>
-            <td>${row.xa_phuong || ""}</td>
-            <td>${row.thon_ap || ""}</td>
-            <td>${row.chuho_ten_001 || ""}</td>
-            <td>${row.chuho_dia_chi || ""}</td>
-            <td>${row.chuho_dien_thoai || ""}</td>
-            <td>${row.submission_time || ""}</td>
-        </tr>`;
-    });
-
-    document.getElementById("dataTable").innerHTML = html;
-
-    document.getElementById("pageInfo").innerText =
-        "Trang " + currentPage + "/" + Math.ceil(filteredData.length / rowsPerPage);
-}
-
-document.getElementById("search").addEventListener("input", function(e){
-    applyFilters();
+provinces.sort().forEach(p => {
+provinceSelect.innerHTML += `<option value="${p}">${p}</option>`;
 });
 
-document.getElementById("tinhFilter").addEventListener("change", function(e){
-    populateHuyenFilter(e.target.value);
-    applyFilters();
+districts.sort().forEach(d => {
+districtSelect.innerHTML += `<option value="${d}">${d}</option>`;
 });
 
-document.getElementById("huyenFilter").addEventListener("change", function(){
-    applyFilters();
+provinceSelect.onchange = applyFilters;
+districtSelect.onchange = applyFilters;
+document.getElementById("searchInput").oninput = applyFilters;
+}
+
+function applyFilters() {
+
+const search = document.getElementById("searchInput").value.toLowerCase();
+const province = document.getElementById("provinceFilter").value;
+const district = document.getElementById("districtFilter").value;
+
+filteredData = fullData.filter(row => {
+
+return (!province || row.tinh_tp === province)
+&& (!district || row.quan_huyen === district)
+&& Object.values(row).some(val =>
+String(val ?? "").toLowerCase().includes(search)
+);
 });
 
-function applyFilters(){
-    let keyword = document.getElementById("search").value.toLowerCase();
-    let tinh = document.getElementById("tinhFilter").value;
-    let huyen = document.getElementById("huyenFilter").value;
-
-    filteredData = allData.filter(row => {
-        let matchKeyword = Object.values(row).join(" ").toLowerCase().includes(keyword);
-        let matchTinh = !tinh || row.tinh_tp === tinh;
-        let matchHuyen = !huyen || row.quan_huyen === huyen;
-
-        return matchKeyword && matchTinh && matchHuyen;
-    });
-
-    currentPage = 1;
-    renderTable();
+currentPage = 1;
+renderTable();
+updateSummary();
 }
 
-function nextPage(){
-    if(currentPage < Math.ceil(filteredData.length / rowsPerPage)){
-        currentPage++;
-        renderTable();
-    }
+function renderTable() {
+
+const tableHead = document.getElementById("tableHead");
+const tableBody = document.getElementById("tableBody");
+
+tableHead.innerHTML = "";
+tableBody.innerHTML = "";
+
+if (filteredData.length === 0) return;
+
+const columns = Object.keys(filteredData[0]);
+
+let headerRow = "<tr>";
+columns.forEach(col => {
+headerRow += `<th>${columnsMeta[col] || col}</th>`;
+});
+headerRow += "</tr>";
+
+tableHead.innerHTML = headerRow;
+
+const start = (currentPage - 1) * rowsPerPage;
+const pageData = filteredData.slice(start, start + rowsPerPage);
+
+pageData.forEach(row => {
+let rowHTML = "<tr>";
+columns.forEach(col => {
+rowHTML += `<td>${row[col] ?? ""}</td>`;
+});
+rowHTML += "</tr>";
+tableBody.innerHTML += rowHTML;
+});
+
+document.getElementById("pageInfo").innerText =
+`Trang ${currentPage} / ${Math.ceil(filteredData.length / rowsPerPage)}`;
 }
 
-function prevPage(){
-    if(currentPage > 1){
-        currentPage--;
-        renderTable();
-    }
+function nextPage() {
+if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
+currentPage++;
+renderTable();
 }
+}
+
+function prevPage() {
+if (currentPage > 1) {
+currentPage--;
+renderTable();
+}
+}
+
+function updateSummary() {
+document.getElementById("summary").innerHTML =
+`Tổng số hồ sơ: <b>${filteredData.length}</b>`;
+}
+
+function resetFilter() {
+document.getElementById("searchInput").value = "";
+document.getElementById("provinceFilter").value = "";
+document.getElementById("districtFilter").value = "";
+filteredData = fullData;
+currentPage = 1;
+renderTable();
+updateSummary();
+}
+
 </script>
-
 </body>
 </html>
