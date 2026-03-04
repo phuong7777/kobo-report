@@ -56,9 +56,13 @@ if response.status_code == 200:
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(selected_data, f, ensure_ascii=False, indent=2)
-
+    
+    with open("columns.json", "w", encoding="utf-8") as f:
+        json.dump(metadata, f, ensure_ascii=False, indent=2)
+    
     print("Xuất data.json thành công!")
 
 else:
     print("Lỗi khi gọi API:", response.status_code)
+
 
