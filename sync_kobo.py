@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 
 khu_vuc_nat_map = {
     "bac": "NAT Miền Bắc",
@@ -8,8 +9,9 @@ khu_vuc_nat_map = {
 }
 
 # ====== CẤU HÌNH ======
-FORM_UID = FORM_UID
-API_TOKEN = API_TOKEN
+
+FORM_UID = os.getenv("FORM_UID")
+API_TOKEN = os.getenv("API_TOKEN")
 
 url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/"
 headers = {
@@ -47,4 +49,5 @@ if response.status_code == 200:
 else:
 
     print("Lỗi khi gọi API:", response.status_code)
+
 
