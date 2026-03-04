@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Kobo Dashboard</title>
 
-<!-- Excel export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
@@ -16,17 +15,13 @@ body {
 
 h2 { margin-bottom:10px; }
 
-.dashboard {
-    margin-bottom:20px;
-}
-
 .card {
     background:white;
     padding:15px 20px;
     border-radius:10px;
     box-shadow:0 2px 8px rgba(0,0,0,0.1);
     display:inline-block;
-    min-width:150px;
+    margin-bottom:20px;
 }
 
 .card h3 {
@@ -79,9 +74,7 @@ th, td {
     position:relative;
 }
 
-th {
-    background:#f2f2f2;
-}
+th { background:#f2f2f2; }
 
 .hide-btn {
     position:absolute;
@@ -92,16 +85,19 @@ th {
     color:#999;
 }
 
-.hide-btn:hover {
-    color:red;
-}
+.hide-btn:hover { color:red; }
 
-.pagination {
-    margin-top:10px;
-}
+.pagination { margin-top:10px; }
 
-.hidden-col {
+.hidden-col { display:none; }
+
+#columnPanel {
     display:none;
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom:15px;
 }
 </style>
 </head>
@@ -110,11 +106,9 @@ th {
 
 <h2>Kobo Dashboard</h2>
 
-<div class="dashboard">
-    <div class="card">
-        <h3>Tổng hồ sơ</h3>
-        <div class="number" id="totalCount">0</div>
-    </div>
+<div class="card">
+    <h3>Tổng hồ sơ</h3>
+    <div class="number" id="totalCount">0</div>
 </div>
 
 <div class="controls">
@@ -123,7 +117,10 @@ th {
 <select id="districtFilter"></select>
 <button onclick="resetFilter()">Reset</button>
 <button onclick="exportExcel()">Xuất Excel</button>
+<button onclick="toggleColumnPanel()">Quản lý cột</button>
 </div>
+
+<div id="columnPanel"></div>
 
 <table>
 <thead id="tableHead"></thead>
@@ -209,12 +206,12 @@ const columns = Object.keys(columnsMeta);
 
 let headerRow = "<tr>";
 
-columns.forEach((col, index) => {
+columns.forEach(col => {
 
 const hidden = hiddenColumns.has(col) ? "hidden-col" : "";
 
 headerRow += `
-<th class="${hidden}" data-col="${col}">
+<th class="${hidden}">
 ${columnsMeta[col] || col}
 <span class="hide-btn" onclick="toggleColumn('${col}')">👁</span>
 </th>`;
@@ -253,6 +250,59 @@ else
 hiddenColumns.add(col);
 
 renderTable();
+renderColumnPanel();
+}
+
+function toggleColumnPanel() {
+
+const panel = document.getElementById("columnPanel");
+
+if (panel.style.display === "none") {
+panel.style.display = "block";
+renderColumnPanel();
+} else {
+panel.style.display = "none";
+}
+}
+
+function renderColumnPanel() {
+
+const panel = document.getElementById("columnPanel");
+
+panel.innerHTML = "<b>Quản lý hiển thị cột:</b><br><br>";
+
+Object.keys(columnsMeta).forEach(col => {
+
+const checked = hiddenColumns.has(col) ? "" : "checked";
+
+panel.innerHTML += `
+<label style="margin-right:15px">
+<input type="checkbox" value="${col}" ${checked}
+onchange="toggleColumnFromPanel(this)">
+${columnsMeta[col]}
+</label>`;
+});
+
+panel.innerHTML += `
+<br><br>
+<button onclick="showAllColumns()">Hiện tất cả</button>
+`;
+}
+
+function toggleColumnFromPanel(cb) {
+
+if (cb.checked)
+hiddenColumns.delete(cb.value);
+else
+hiddenColumns.add(cb.value);
+
+renderTable();
+}
+
+function showAllColumns() {
+hiddenColumns.clear();
+renderTable();
+renderColumnPanel();
 }
 
 function nextPage() {
