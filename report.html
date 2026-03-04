@@ -164,8 +164,8 @@ function initFilters() {
 
 const provinces = [...new Set(fullData.map(d => d.tinh_tp).filter(Boolean))];
 const districts = [...new Set(fullData.map(d => d.quan_huyen).filter(Boolean))];
-const natAreas = [...new Set(fullData.map(d => d.nha_an_toan_khu_vuc_ho_tro).filter(Boolean))];
-const sponsors = [...new Set(fullData.map(d => d.nha_tai_tro).filter(Boolean))];
+const natAreas = [...new Set(fullData.map(d => d.khu_vuc_nat).filter(Boolean))];
+const sponsors = [...new Set(fullData.map(d => d.ho_tro_ten).filter(Boolean))];
 
 provinceFilter.innerHTML = '<option value="">Tất cả tỉnh</option>';
 districtFilter.innerHTML = '<option value="">Tất cả quận</option>';
@@ -206,8 +206,8 @@ const sponsor = sponsorFilter.value;
 filteredData = fullData.filter(row =>
 (!province || row.tinh_tp === province)
 && (!district || row.quan_huyen === district)
-&& (!nat || row.nha_an_toan_khu_vuc_ho_tro === nat)
-&& (!sponsor || row.nha_tai_tro === sponsor)
+&& (!nat || row.khu_vuc_nat === nat)
+&& (!sponsor || row.ho_tro_ten === sponsor)
 && Object.values(row).some(val =>
 String(val ?? "").toLowerCase().includes(search))
 );
@@ -380,3 +380,4 @@ XLSX.writeFile(workbook, "kobo_report.xlsx");
 
 </body>
 </html>
+
