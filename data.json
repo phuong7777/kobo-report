@@ -1,7 +1,7 @@
 [
   {
     "id_ho_so": "1",
-    "khu_vuc_nat": "bac",
+    "khu_vuc_nat": "NAT Miền Bắc",
     "tinh_tp": "Quảng Ninh",
     "quan_huyen": "Cẩm Phả",
     "xa_phuong": "Mông Dương",
@@ -16,7 +16,7 @@
     "thiet_hai_gan_nhat": null,
     "phuong_an": null,
     "muc_ho_tro": "30000000",
-    "tinh_trang_ho_so": "hoanthanh",
+    "tinh_trang_ho_so": "Hoàn thành",
     "ly_do_huy": null,
     "anh_ho_khau": null,
     "ngay_nghien_thu": "2016-01-01",
@@ -28,7 +28,7 @@
   },
   {
     "id_ho_so": "2",
-    "khu_vuc_nat": "trung",
+    "khu_vuc_nat": "NAT Miền Trung",
     "tinh_tp": "Khanh_Hoa",
     "quan_huyen": "Cẩm Phả",
     "xa_phuong": "Mông Dương",
@@ -43,7 +43,7 @@
     "thiet_hai_gan_nhat": null,
     "phuong_an": null,
     "muc_ho_tro": "30000000",
-    "tinh_trang_ho_so": "hoanthanh",
+    "tinh_trang_ho_so": "Hoàn thành",
     "ly_do_huy": null,
     "anh_ho_khau": null,
     "ngay_nghien_thu": "2016-01-17",
@@ -55,7 +55,7 @@
   },
   {
     "id_ho_so": "3",
-    "khu_vuc_nat": "tay",
+    "khu_vuc_nat": "NAT Miền Tây",
     "tinh_tp": "An_Giang",
     "quan_huyen": "Uông Bí",
     "xa_phuong": "Phương Nam",
@@ -70,7 +70,7 @@
     "thiet_hai_gan_nhat": null,
     "phuong_an": null,
     "muc_ho_tro": "70000000",
-    "tinh_trang_ho_so": "hoanthanh",
+    "tinh_trang_ho_so": "Hoàn thành",
     "ly_do_huy": null,
     "anh_ho_khau": null,
     "ngay_nghien_thu": null,
