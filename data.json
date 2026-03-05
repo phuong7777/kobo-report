@@ -29,7 +29,7 @@
   {
     "id_ho_so": "2",
     "khu_vuc_nat": "NAT Miền Trung",
-    "tinh_tp": "Quảng Ninh",
+    "tinh_tp": "Khanh_Hoa",
     "quan_huyen": "Cẩm Phả",
     "xa_phuong": "Mông Dương",
     "thon_ap": "Tổ 4, Khu 5",
@@ -56,7 +56,7 @@
   {
     "id_ho_so": "3",
     "khu_vuc_nat": "NAT Miền Tây",
-    "tinh_tp": "Quảng Ninh",
+    "tinh_tp": "An_Giang",
     "quan_huyen": "Uông Bí",
     "xa_phuong": "Phương Nam",
     "thon_ap": "Phong Tháo",
@@ -77,7 +77,7 @@
     "ho_tro_ten": "Dự án Nhà chống lũ",
     "ho_tro_dai_dien": "Lương Văn Hùng",
     "ho_tro_chuc_vu": "Trưởng ban xây dựng và cộng đồng",
-    "ho_tro_dien_thoai": "0983569307",
+    "ho_tro_dien_thoai": "983569307",
     "submission_time": "2026-02-26T06:10:22"
   }
 ]
