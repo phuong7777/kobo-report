@@ -3,13 +3,6 @@ import json
 import os
 import pandas as pd
 
-# ====== MAP LABEL ======
-khu_vuc_nat_map = {
-    "bac": "NAT Miền Bắc",
-    "trung": "NAT Miền Trung",
-    "tay": "NAT Miền Tây"
-}
-
 # ====== LẤY BIẾN MÔI TRƯỜNG ======
 FORM_UID = os.getenv("FORM_UID")
 API_TOKEN = os.getenv("API_TOKEN")
@@ -32,11 +25,27 @@ if response.status_code != 200:
 
 data = response.json()["results"]
 
-# ====== ĐỌC FILE CẤU HÌNH BIẾN ======
+# ====== ĐỌC FILE FIELDS ======
 fields_df = pd.read_excel("fields.xlsx")
 fields = fields_df.to_dict(orient="records")
 
-# Tạo metadata cho header hiển thị
+# ====== ĐỌC FILE CHOICES ======
+choices_df = pd.read_excel("choices.xlsx")
+
+# Tạo dictionary mapping
+choices_map = {}
+
+for _, row in choices_df.iterrows():
+    var = row["variable"]
+    val = row["value"]
+    label = row["label"]
+
+    if var not in choices_map:
+        choices_map[var] = {}
+
+    choices_map[var][val] = label
+
+# ====== TẠO META COLUMNS ======
 columns_meta = {
     field["field_output"]: field["display_name"]
     for field in fields
@@ -44,18 +53,21 @@ columns_meta = {
 
 selected_data = []
 
+# ====== XỬ LÝ DATA ======
 for row in data:
+
     record = {}
 
     for field in fields:
+
         field_path = field["field_path"]
         field_output = field["field_output"]
 
         value = row.get(field_path)
 
-        # Map label nếu là khu_vuc_nat
-        if field_output == "khu_vuc_nat":
-            value = khu_vuc_nat_map.get(value, value)
+        # Map label nếu có trong choices
+        if field_output in choices_map:
+            value = choices_map[field_output].get(value, value)
 
         record[field_output] = value
 
@@ -65,11 +77,11 @@ for row in data:
 
     selected_data.append(record)
 
-# ====== GHI FILE DATA ======
+# ====== GHI DATA.JSON ======
 with open("data.json", "w", encoding="utf-8") as f:
     json.dump(selected_data, f, ensure_ascii=False, indent=2)
 
-# ====== GHI FILE COLUMNS ======
+# ====== GHI COLUMNS.JSON ======
 with open("columns.json", "w", encoding="utf-8") as f:
     json.dump(columns_meta, f, ensure_ascii=False, indent=2)
 
