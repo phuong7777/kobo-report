@@ -36,8 +36,8 @@ choices_df = pd.read_excel("choices.xlsx")
 choices_map = {}
 
 for _, row in choices_df.iterrows():
-    var = row["variable"]
-    val = row["value"]
+    var = row["list_name"]
+    val = row["name"]
     label = row["label"]
 
     if var not in choices_map:
@@ -86,3 +86,4 @@ with open("columns.json", "w", encoding="utf-8") as f:
     json.dump(columns_meta, f, ensure_ascii=False, indent=2)
 
 print("Xuất data.json và columns.json thành công!")
+
