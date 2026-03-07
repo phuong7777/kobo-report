@@ -11,11 +11,12 @@ if not FORM_UID or not API_TOKEN:
     print("Thiếu FORM_UID hoặc API_TOKEN")
     exit()
 
-# ====== GỌI API KOBO ======
-url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/"
 headers = {
     "Authorization": f"Token {API_TOKEN}"
 }
+
+# ====== GỌI API DATA ======
+url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/"
 
 response = requests.get(url, headers=headers)
 
@@ -32,24 +33,26 @@ fields = fields_df.to_dict(orient="records")
 # ====== ĐỌC FILE CHOICES ======
 choices_df = pd.read_excel("choices.xlsx")
 
-# Tạo dictionary mapping
 choices_map = {}
 
 for _, row in choices_df.iterrows():
-    var = row["list_name"]
-    val = row["name"]
+
+    list_name = row["list_name"]
+    name = row["name"]
     label = row["label"]
 
-    if var not in choices_map:
-        choices_map[var] = {}
+    if list_name not in choices_map:
+        choices_map[list_name] = {}
 
-    choices_map[var][val] = label
+    choices_map[list_name][name] = label
 
-# ====== TẠO META COLUMNS ======
+# ====== META COLUMNS ======
 columns_meta = {
     field["field_output"]: field["display_name"]
     for field in fields
 }
+
+columns_meta["submission_time"] = "Thời gian nộp"
 
 selected_data = []
 
@@ -58,30 +61,42 @@ for row in data:
 
     record = {}
 
+    record_id = row["_id"]
+
+    # ===== LẤY ATTACHMENTS =====
+    attach_url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/{record_id}/attachments/"
+    attach_res = requests.get(attach_url, headers=headers)
+
+    attachments = []
+
+    if attach_res.status_code == 200:
+        attachments = attach_res.json()["results"]
+
+    attachment_map = {
+        a["filename"]: a["download_url"]
+        for a in attachments
+    }
+
+    # ===== MAP FIELD =====
     for field in fields:
 
         field_path = field["field_path"]
         field_output = field["field_output"]
+        list_name = field.get("choice_list")
 
         value = row.get(field_path)
 
-        # ===== xử lý file attachment =====
-        if value and "_attachments" in row:
-        
-            for att in row["_attachments"]:
-        
-                if att.get("filename") == value:
-                    record[field_output + "_URL"] = att.get("download_url")
-                    
-        # Map label nếu có trong choices
-        if field_output in choices_map:
-            value = choices_map[field_output].get(value, value)
+        # ===== map label choices =====
+        if list_name in choices_map:
+            value = choices_map[list_name].get(value, value)
+
+        # ===== xử lý file upload =====
+        if value in attachment_map:
+            record[field_output + "_URL"] = attachment_map[value]
 
         record[field_output] = value
 
-    # luôn thêm submission time
     record["submission_time"] = row.get("_submission_time")
-    columns_meta["submission_time"] = "Thời gian nộp"
 
     selected_data.append(record)
 
@@ -94,5 +109,3 @@ with open("columns.json", "w", encoding="utf-8") as f:
     json.dump(columns_meta, f, ensure_ascii=False, indent=2)
 
 print("Xuất data.json và columns.json thành công!")
-
-
