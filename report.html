@@ -227,11 +227,11 @@ columns.forEach(col=>{
 const hidden=hiddenColumns.has(col)?"hidden-col":"";
 let cell=row[col]??"";
 
-/* ===== HIỂN THỊ NÚT DOWNLOAD CHO FILE ===== */
+/* ===== HIỂN THỊ NÚT DOWNLOAD ===== */
 
-if(row[col+"_URL"]){
+if(col.endsWith("_URL") && cell){
 
-cell=`<a class="download-btn" href="${row[col+"_URL"]}" target="_blank">⬇ Download</a>`;
+cell=`<a class="download-btn" href="${cell}" target="_blank">⬇ Download</a>`;
 
 }
 
@@ -307,5 +307,4 @@ XLSX.writeFile(workbook,"kobo_report.xlsx");
 
 </body>
 </html>
-
 
