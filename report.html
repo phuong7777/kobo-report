@@ -163,60 +163,61 @@ renderTable();
 updateSummary();
 });
 
-function initFilters(){
-updateFilterOptions(fullData)
+function initFilters() {
 
-natFilter.onchange=applyFilters
-sponsorFilter.onchange=applyFilters
-provinceFilter.onchange=applyFilters
-districtFilter.onchange=applyFilters
-searchInput.oninput=applyFilters
+const natList = [...new Set(fullData.map(d => d.khu_vuc_nat).filter(Boolean))];
+const sponsorList = [...new Set(fullData.map(d => d.ho_tro_ten).filter(Boolean))];
+const provinces = [...new Set(fullData.map(d => d.tinh_tp).filter(Boolean))];
+const districts = [...new Set(fullData.map(d => d.quan_huyen).filter(Boolean))];
+
+natFilter.innerHTML = '<option value="">Khu vực NAT</option>';
+sponsorFilter.innerHTML = '<option value="">Nhà tài trợ</option>';
+provinceFilter.innerHTML = '<option value="">Tất cả tỉnh</option>';
+districtFilter.innerHTML = '<option value="">Tất cả quận</option>';
+
+natList.sort().forEach(v =>
+natFilter.innerHTML += `<option value="${v}">${v}</option>`
+);
+
+sponsorList.sort().forEach(v =>
+sponsorFilter.innerHTML += `<option value="${v}">${v}</option>`
+);
+
+provinces.sort().forEach(v =>
+provinceFilter.innerHTML += `<option value="${v}">${v}</option>`
+);
+
+districts.sort().forEach(v =>
+districtFilter.innerHTML += `<option value="${v}">${v}</option>`
+);
+
+natFilter.onchange = applyFilters;
+sponsorFilter.onchange = applyFilters;
+provinceFilter.onchange = applyFilters;
+districtFilter.onchange = applyFilters;
+searchInput.oninput = applyFilters;
 }
 
-function updateFilterOptions(data){
+function applyFilters() {
 
-const natList=[...new Set(data.map(d=>d.khu_vuc_nat).filter(Boolean))]
-const sponsorList=[...new Set(data.map(d=>d.ho_tro_ten).filter(Boolean))]
-const provinces=[...new Set(data.map(d=>d.tinh_tp).filter(Boolean))]
-const districts=[...new Set(data.map(d=>d.quan_huyen).filter(Boolean))]
+const search = searchInput.value.toLowerCase();
+const nat = natFilter.value;
+const sponsor = sponsorFilter.value;
+const province = provinceFilter.value;
+const district = districtFilter.value;
 
-natFilter.innerHTML='<option value="">Khu vực NAT</option>'
-sponsorFilter.innerHTML='<option value="">Nhà tài trợ</option>'
-provinceFilter.innerHTML='<option value="">Tỉnh/ TP</option>'
-districtFilter.innerHTML='<option value="">Quận/ Huyện</option>'
+filteredData = fullData.filter(row =>
+(!nat || row.khu_vuc_nat === nat)
+&& (!sponsor || row.ho_tro_ten === sponsor)
+&& (!province || row.tinh_tp === province)
+&& (!district || row.quan_huyen === district)
+&& Object.values(row).some(val =>
+String(val ?? "").toLowerCase().includes(search))
+);
 
-natList.sort().forEach(v=>natFilter.innerHTML+=`<option value="${v}">${v}</option>`)
-sponsorList.sort().forEach(v=>sponsorFilter.innerHTML+=`<option value="${v}">${v}</option>`)
-provinces.sort().forEach(v=>provinceFilter.innerHTML+=`<option value="${v}">${v}</option>`)
-districts.sort().forEach(v=>districtFilter.innerHTML+=`<option value="${v}">${v}</option>`)
-
-}
-    
-function applyFilters(){
-
-const search=searchInput.value.toLowerCase()
-
-const nat=natFilter.value
-const sponsor=sponsorFilter.value
-const province=provinceFilter.value
-const district=districtFilter.value
-
-filteredData=fullData.filter(row=>
-
-(!nat||row.khu_vuc_nat===nat)
-&&(!sponsor||row.ho_tro_ten===sponsor)
-&&(!province||row.tinh_tp===province)
-&&(!district||row.quan_huyen===district)
-&&Object.values(row).some(val=>String(val??"").toLowerCase().includes(search))
-
-)
-
-updateFilterOptions(filteredData)
-
-currentPage=1
-renderTable()
-updateSummary()
-
+currentPage = 1;
+renderTable();
+updateSummary();
 }
 
 function renderTable() {
@@ -382,7 +383,6 @@ XLSX.writeFile(workbook, "kobo_report.xlsx");
 
 </body>
 </html>
-
 
 
 
