@@ -7,115 +7,98 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-body {
-    font-family: 'Segoe UI', Arial;
-    background:#f4f6f9;
-    padding:20px;
+
+body{
+font-family:'Segoe UI',Arial;
+background:#f4f6f9;
+padding:20px;
 }
 
-h2 { margin-bottom:10px; }
+h2{margin-bottom:10px;}
 
-.card {
-    background:white;
-    padding:15px 20px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    display:inline-block;
-    margin-bottom:20px;
+.card{
+background:white;
+padding:15px 20px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+display:inline-block;
+margin-bottom:20px;
 }
 
-.card h3 {
-    margin:0;
-    font-size:14px;
-    color:#777;
+.card h3{
+margin:0;
+font-size:14px;
+color:#777;
 }
 
-.card .number {
-    font-size:22px;
-    font-weight:bold;
-    margin-top:5px;
+.card .number{
+font-size:22px;
+font-weight:bold;
+margin-top:5px;
 }
 
-.controls {
-    background:white;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom:15px;
+.controls{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+margin-bottom:15px;
 }
 
-select, input, button {
-    padding:6px;
-    margin-right:8px;
-    margin-bottom:5px;
+select,input,button{
+padding:6px;
+margin-right:8px;
+margin-bottom:5px;
 }
 
-button {
-    cursor:pointer;
-    background:#4CAF50;
-    color:white;
-    border:none;
-    border-radius:4px;
+button{
+cursor:pointer;
+background:#4CAF50;
+color:white;
+border:none;
+border-radius:4px;
 }
 
-button:hover { opacity:0.9; }
-
-table {
-    border-collapse: collapse;
-    width:100%;
-    background:white;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+table{
+border-collapse:collapse;
+width:100%;
+background:white;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
-th, td {
-    border:1px solid #eee;
-    padding:6px;
-    font-size:13px;
-    position:relative;
+th,td{
+border:1px solid #eee;
+padding:6px;
+font-size:13px;
 }
 
-th { background:#f2f2f2; }
+th{background:#f2f2f2;}
 
-.hide-btn {
-    position:absolute;
-    right:5px;
-    top:5px;
-    font-size:12px;
-    cursor:pointer;
-    color:#999;
+.download-btn{
+padding:4px 8px;
+background:#1976d2;
+color:white;
+border-radius:4px;
+text-decoration:none;
+font-size:12px;
 }
 
-.hide-btn:hover { color:red; }
-
-.pagination { margin-top:10px; }
-
-.hidden-col { display:none; }
-
-#columnPanel {
-    display:none;
-    background:white;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom:15px;
-}
 </style>
 </head>
 
 <body>
 
-<h2>DỰ ÁN DATA NHÀ CHỐNG LŨ (demo)</h2>
+<h2>DỰ ÁN DATA NHÀ CHỐNG LŨ</h2>
 
 <div class="card">
-    <h3>Tổng hồ sơ</h3>
-    <div class="number" id="totalCount">0</div>
+<h3>Tổng hồ sơ</h3>
+<div class="number" id="totalCount">0</div>
 </div>
 
 <div class="controls">
 
 <input type="text" id="searchInput" placeholder="Tìm kiếm...">
 
-<!-- Thứ tự mới -->
 <select id="natFilter"></select>
 <select id="sponsorFilter"></select>
 <select id="provinceFilter"></select>
@@ -123,18 +106,15 @@ th { background:#f2f2f2; }
 
 <button onclick="resetFilter()">Reset</button>
 <button onclick="exportExcel()">Xuất Excel</button>
-<button onclick="toggleColumnPanel()">Quản lý cột</button>
 
 </div>
-
-<div id="columnPanel"></div>
 
 <table>
 <thead id="tableHead"></thead>
 <tbody id="tableBody"></tbody>
 </table>
 
-<div class="pagination">
+<div style="margin-top:10px">
 <button onclick="prevPage()">Prev</button>
 <span id="pageInfo"></span>
 <button onclick="nextPage()">Next</button>
@@ -142,248 +122,214 @@ th { background:#f2f2f2; }
 
 <script>
 
-let fullData = [];
-let filteredData = [];
-let columnsMeta = {};
-let hiddenColumns = new Set();
-let currentPage = 1;
-let rowsPerPage = 10;
+let fullData=[]
+let filteredData=[]
+let columnsMeta={}
+let currentPage=1
+let rowsPerPage=10
 
 Promise.all([
-fetch("data.json?v=" + new Date().getTime()).then(res => res.json()),
-fetch("columns.json?v=" + new Date().getTime()).then(res => res.json())
-]).then(([data, meta]) => {
+fetch("data.json?v="+Date.now()).then(r=>r.json()),
+fetch("columns.json?v="+Date.now()).then(r=>r.json())
+]).then(([data,meta])=>{
 
-fullData = data;
-filteredData = data;
-columnsMeta = meta;
+fullData=data
+filteredData=data
+columnsMeta=meta
 
-initFilters();
-renderTable();
-updateSummary();
-});
+initFilters()
+renderTable()
+updateSummary()
 
-function initFilters() {
+})
 
-const natList = [...new Set(fullData.map(d => d.khu_vuc_nat).filter(Boolean))];
-const sponsorList = [...new Set(fullData.map(d => d.ho_tro_ten).filter(Boolean))];
-const provinces = [...new Set(fullData.map(d => d.tinh_tp).filter(Boolean))];
-const districts = [...new Set(fullData.map(d => d.quan_huyen).filter(Boolean))];
+/* ---------------- FILTER INIT ---------------- */
 
-natFilter.innerHTML = '<option value="">Khu vực NAT</option>';
-sponsorFilter.innerHTML = '<option value="">Nhà tài trợ</option>';
-provinceFilter.innerHTML = '<option value="">Tất cả tỉnh</option>';
-districtFilter.innerHTML = '<option value="">Tất cả quận</option>';
+function initFilters(){
 
-natList.sort().forEach(v =>
-natFilter.innerHTML += `<option value="${v}">${v}</option>`
-);
+updateFilterOptions(fullData)
 
-sponsorList.sort().forEach(v =>
-sponsorFilter.innerHTML += `<option value="${v}">${v}</option>`
-);
+natFilter.onchange=()=>{
 
-provinces.sort().forEach(v =>
-provinceFilter.innerHTML += `<option value="${v}">${v}</option>`
-);
+sponsorFilter.value=""
+provinceFilter.value=""
+districtFilter.value=""
 
-districts.sort().forEach(v =>
-districtFilter.innerHTML += `<option value="${v}">${v}</option>`
-);
+applyFilters()
 
-natFilter.onchange = applyFilters;
-sponsorFilter.onchange = applyFilters;
-provinceFilter.onchange = applyFilters;
-districtFilter.onchange = applyFilters;
-searchInput.oninput = applyFilters;
 }
 
-function applyFilters() {
+sponsorFilter.onchange=applyFilters
+provinceFilter.onchange=applyFilters
+districtFilter.onchange=applyFilters
+searchInput.oninput=applyFilters
 
-const search = searchInput.value.toLowerCase();
-const nat = natFilter.value;
-const sponsor = sponsorFilter.value;
-const province = provinceFilter.value;
-const district = districtFilter.value;
-
-filteredData = fullData.filter(row =>
-(!nat || row.khu_vuc_nat === nat)
-&& (!sponsor || row.ho_tro_ten === sponsor)
-&& (!province || row.tinh_tp === province)
-&& (!district || row.quan_huyen === district)
-&& Object.values(row).some(val =>
-String(val ?? "").toLowerCase().includes(search))
-);
-
-currentPage = 1;
-renderTable();
-updateSummary();
 }
 
-function renderTable() {
+/* ---------------- UPDATE FILTER OPTIONS ---------------- */
 
-tableHead.innerHTML = "";
-tableBody.innerHTML = "";
+function updateFilterOptions(data){
 
-if (filteredData.length === 0) return;
+const natList=[...new Set(fullData.map(d=>d.khu_vuc_nat).filter(Boolean))]
+const sponsorList=[...new Set(data.map(d=>d.ho_tro_ten).filter(Boolean))]
+const provinces=[...new Set(data.map(d=>d.tinh_tp).filter(Boolean))]
+const districts=[...new Set(data.map(d=>d.quan_huyen).filter(Boolean))]
 
-const columns = Object.keys(columnsMeta);
+natFilter.innerHTML='<option value="">Tất cả Khu vực NAT</option>'
+sponsorFilter.innerHTML='<option value="">Tất cả Nhà tài trợ</option>'
+provinceFilter.innerHTML='<option value="">Tất cả Tỉnh</option>'
+districtFilter.innerHTML='<option value="">Tất cả Huyện</option>'
 
-let headerRow = "<tr>";
+natList.sort().forEach(v=>natFilter.innerHTML+=`<option value="${v}">${v}</option>`)
+sponsorList.sort().forEach(v=>sponsorFilter.innerHTML+=`<option value="${v}">${v}</option>`)
+provinces.sort().forEach(v=>provinceFilter.innerHTML+=`<option value="${v}">${v}</option>`)
+districts.sort().forEach(v=>districtFilter.innerHTML+=`<option value="${v}">${v}</option>`)
 
-columns.forEach(col => {
-
-const hidden = hiddenColumns.has(col) ? "hidden-col" : "";
-
-headerRow += `
-<th class="${hidden}">
-${columnsMeta[col] || col}
-<span class="hide-btn" onclick="toggleColumn('${col}')">👁</span>
-</th>`;
-});
-
-headerRow += "</tr>";
-tableHead.innerHTML = headerRow;
-
-const start = (currentPage - 1) * rowsPerPage;
-const pageData = filteredData.slice(start, start + rowsPerPage);
-
-pageData.forEach(row => {
-
-let rowHTML = "<tr>";
-
-columns.forEach(col => {
-
-const hidden = hiddenColumns.has(col) ? "hidden-col" : "";
-
-rowHTML += `<td class="${hidden}">${row[col] ?? ""}</td>`;
-});
-
-rowHTML += "</tr>";
-tableBody.innerHTML += rowHTML;
-});
-
-pageInfo.innerText =
-`Trang ${currentPage} / ${Math.ceil(filteredData.length / rowsPerPage)}`;
 }
 
-function toggleColumn(col) {
+/* ---------------- APPLY FILTER ---------------- */
 
-if (hiddenColumns.has(col))
-hiddenColumns.delete(col);
-else
-hiddenColumns.add(col);
+function applyFilters(){
 
-renderTable();
-renderColumnPanel();
+const search=searchInput.value.toLowerCase()
+const nat=natFilter.value
+const sponsor=sponsorFilter.value
+const province=provinceFilter.value
+const district=districtFilter.value
+
+filteredData=fullData.filter(row=>
+
+(!nat||row.khu_vuc_nat===nat)
+&&(!sponsor||row.ho_tro_ten===sponsor)
+&&(!province||row.tinh_tp===province)
+&&(!district||row.quan_huyen===district)
+&&Object.values(row).some(v=>String(v??"").toLowerCase().includes(search))
+
+)
+
+updateFilterOptions(filteredData)
+
+currentPage=1
+renderTable()
+updateSummary()
+
 }
 
-function toggleColumnPanel() {
+/* ---------------- TABLE ---------------- */
 
-const panel = document.getElementById("columnPanel");
+function renderTable(){
 
-if (panel.style.display === "none") {
-panel.style.display = "block";
-renderColumnPanel();
-} else {
-panel.style.display = "none";
-}
-}
+tableHead.innerHTML=""
+tableBody.innerHTML=""
 
-function renderColumnPanel() {
+if(filteredData.length===0) return
 
-const panel = document.getElementById("columnPanel");
+const columns=Object.keys(columnsMeta)
 
-panel.innerHTML = "<b>Quản lý hiển thị cột:</b><br><br>";
+let header="<tr>"
+columns.forEach(col=>{
+header+=`<th>${columnsMeta[col]||col}</th>`
+})
+header+="</tr>"
+tableHead.innerHTML=header
 
-Object.keys(columnsMeta).forEach(col => {
+const start=(currentPage-1)*rowsPerPage
+const pageData=filteredData.slice(start,start+rowsPerPage)
 
-const checked = hiddenColumns.has(col) ? "" : "checked";
+pageData.forEach(row=>{
 
-panel.innerHTML += `
-<label style="margin-right:15px">
-<input type="checkbox" value="${col}" ${checked}
-onchange="toggleColumnFromPanel(this)">
-${columnsMeta[col]}
-</label>`;
-});
+let rowHTML="<tr>"
 
-panel.innerHTML += `
-<br><br>
-<button onclick="showAllColumns()">Hiện tất cả</button>
-`;
-}
+columns.forEach(col=>{
 
-function toggleColumnFromPanel(cb) {
+let cell=row[col]??""
 
-if (cb.checked)
-hiddenColumns.delete(cb.value);
-else
-hiddenColumns.add(cb.value);
+/* HIỂN THỊ DOWNLOAD */
 
-renderTable();
+if(row[col+"_URL"]){
+
+cell=`<a class="download-btn" href="${row[col+"_URL"]}" target="_blank">⬇ Download</a>`
+
 }
 
-function showAllColumns() {
-hiddenColumns.clear();
-renderTable();
-renderColumnPanel();
+rowHTML+=`<td>${cell}</td>`
+
+})
+
+rowHTML+="</tr>"
+tableBody.innerHTML+=rowHTML
+
+})
+
+pageInfo.innerText=`Trang ${currentPage} / ${Math.ceil(filteredData.length/rowsPerPage)}`
+
 }
 
-function nextPage() {
-if (currentPage < Math.ceil(filteredData.length / rowsPerPage)) {
-currentPage++;
-renderTable();
+/* ---------------- PAGINATION ---------------- */
+
+function nextPage(){
+if(currentPage<Math.ceil(filteredData.length/rowsPerPage)){
+currentPage++
+renderTable()
 }
 }
 
-function prevPage() {
-if (currentPage > 1) {
-currentPage--;
-renderTable();
+function prevPage(){
+if(currentPage>1){
+currentPage--
+renderTable()
 }
 }
 
-function updateSummary() {
-totalCount.innerText = filteredData.length;
+/* ---------------- SUMMARY ---------------- */
+
+function updateSummary(){
+totalCount.innerText=filteredData.length
 }
 
-function resetFilter() {
-searchInput.value = "";
-natFilter.value = "";
-sponsorFilter.value = "";
-provinceFilter.value = "";
-districtFilter.value = "";
-filteredData = fullData;
-currentPage = 1;
-renderTable();
-updateSummary();
+/* ---------------- RESET ---------------- */
+
+function resetFilter(){
+
+searchInput.value=""
+natFilter.value=""
+sponsorFilter.value=""
+provinceFilter.value=""
+districtFilter.value=""
+
+filteredData=[...fullData]
+
+updateFilterOptions(fullData)
+
+currentPage=1
+renderTable()
+updateSummary()
+
 }
 
-function exportExcel() {
+/* ---------------- EXPORT EXCEL ---------------- */
 
-const columns = Object.keys(columnsMeta)
-.filter(col => !hiddenColumns.has(col));
+function exportExcel(){
 
-const dataToExport = filteredData.map(row => {
-let newRow = {};
-columns.forEach(col =>
-newRow[columnsMeta[col]] = row[col]
-);
-return newRow;
-});
+const columns=Object.keys(columnsMeta)
 
-const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-const workbook = XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
-XLSX.writeFile(workbook, "kobo_report.xlsx");
+const dataToExport=filteredData.map(row=>{
+let newRow={}
+columns.forEach(col=>{
+newRow[columnsMeta[col]]=row[col]
+})
+return newRow
+})
+
+const worksheet=XLSX.utils.json_to_sheet(dataToExport)
+const workbook=XLSX.utils.book_new()
+XLSX.utils.book_append_sheet(workbook,worksheet,"Report")
+
+XLSX.writeFile(workbook,"kobo_report.xlsx")
+
 }
 
 </script>
 
 </body>
 </html>
-
-
-
-
