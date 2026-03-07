@@ -65,6 +65,14 @@ for row in data:
 
         value = row.get(field_path)
 
+        # ===== xử lý file attachment =====
+        if value and "_attachments" in row:
+        
+            for att in row["_attachments"]:
+        
+                if att.get("filename") == value:
+                    record[field_output + "_URL"] = att.get("download_url")
+                    
         # Map label nếu có trong choices
         if field_output in choices_map:
             value = choices_map[field_output].get(value, value)
@@ -86,4 +94,5 @@ with open("columns.json", "w", encoding="utf-8") as f:
     json.dump(columns_meta, f, ensure_ascii=False, indent=2)
 
 print("Xuất data.json và columns.json thành công!")
+
 
