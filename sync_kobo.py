@@ -31,24 +31,22 @@ data = response.json()["results"]
 fields_df = pd.read_excel("fields.xlsx")
 fields = fields_df.to_dict(orient="records")
 
-# ======================
-# ĐỌC CHOICES
-# ======================
-
+# ====== ĐỌC FILE CHOICES ======
 choices_df = pd.read_excel("choices.xlsx")
 
+# Tạo dictionary mapping
 choices_map = {}
 
 for _, row in choices_df.iterrows():
-
-    list_name = row["list_name"]
-    name = row["name"]
+    var = row["list_name"]
+    val = row["name"]
     label = row["label"]
 
-    if list_name not in choices_map:
-        choices_map[list_name] = {}
+    if var not in choices_map:
+        choices_map[var] = {}
 
-    choices_map[list_name][name] = label
+    choices_map[var][val] = label
+
 
 # ======================
 # META COLUMNS
@@ -108,3 +106,4 @@ with open("columns.json", "w", encoding="utf-8") as f:
     json.dump(columns_meta, f, ensure_ascii=False, indent=2)
 
 print("Export data.json success")
+
