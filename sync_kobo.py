@@ -10,24 +10,26 @@ headers = {
     "Authorization": f"Token {API_TOKEN}"
 }
 
-# ===== LẤY DATA =====
+# =========================
+# GET DATA
+# =========================
 
 url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/?format=json"
 
 response = requests.get(url, headers=headers)
 
-if response.status_code != 200:
-    print("API error:", response.status_code)
-    exit()
-
 data = response.json()["results"]
 
-# ===== LOAD FIELDS =====
+# =========================
+# LOAD FIELDS
+# =========================
 
 fields_df = pd.read_excel("fields.xlsx")
 fields = fields_df.to_dict(orient="records")
 
-# ===== LOAD CHOICES =====
+# =========================
+# LOAD CHOICES
+# =========================
 
 choices_df = pd.read_excel("choices.xlsx")
 
@@ -44,48 +46,46 @@ for _, row in choices_df.iterrows():
 
     choices_map[list_name][name] = label
 
-# ===== COLUMN META =====
+# =========================
+# COLUMN META
+# =========================
 
-columns_meta = {}
-
-for f in fields:
-    columns_meta[f["field_output"]] = f["display_name"]
-
+columns_meta = {f["field_output"]: f["display_name"] for f in fields}
 columns_meta["submission_time"] = "Thời gian nộp"
 
 selected_data = []
 
-# ===== PROCESS RECORDS =====
+# =========================
+# PROCESS DATA
+# =========================
 
 for row in data:
 
     record = {}
     record_id = row["_id"]
 
-    # ===== GET ATTACHMENTS =====
+    # lấy attachment
+    attach_api = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/{record_id}/attachments/"
 
-    attach_url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/{record_id}/attachments/"
-
-    attach_res = requests.get(attach_url, headers=headers)
+    attach_res = requests.get(attach_api, headers=headers)
 
     attachments = []
 
     if attach_res.status_code == 200:
         attachments = attach_res.json()["results"]
 
-    # map filename -> url
+    # map file
     file_map = {}
 
     for a in attachments:
 
-        filename = a.get("filename")
+        filename = a.get("filename", "")
 
         url = a.get("download_large_url") or a.get("download_medium_url")
 
         file_map[filename] = url
 
-    # ===== MAP FIELDS =====
-
+    # map field
     for field in fields:
 
         field_path = field["field_path"]
@@ -93,21 +93,26 @@ for row in data:
 
         value = row.get(field_path)
 
-        # map label choices
+        # map label
         if field_path in choices_map:
             value = choices_map[field_path].get(value, value)
 
         record[field_output] = value
 
-        # if file field
-        if value in file_map:
-            record[field_output + "_URL"] = file_map[value]
+        # tìm file attachment
+        if value:
+            for fname, furl in file_map.items():
+
+                if fname.endswith(value):
+                    record[field_output + "_URL"] = furl
 
     record["submission_time"] = row.get("_submission_time")
 
     selected_data.append(record)
 
-# ===== SAVE DATA =====
+# =========================
+# SAVE JSON
+# =========================
 
 with open("data.json", "w", encoding="utf-8") as f:
     json.dump(selected_data, f, ensure_ascii=False, indent=2)
@@ -115,4 +120,4 @@ with open("data.json", "w", encoding="utf-8") as f:
 with open("columns.json", "w", encoding="utf-8") as f:
     json.dump(columns_meta, f, ensure_ascii=False, indent=2)
 
-print("Export data.json success")
+print("Export success")
