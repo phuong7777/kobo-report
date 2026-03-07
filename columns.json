@@ -22,7 +22,7 @@
   "ho_tro_dai_dien": "Tên đại diện/ CB phụ trách",
   "ho_tro_chuc_vu": "Chức vụ (CB phụ trách)",
   "ho_tro_dien_thoai": "Số điện thoại (CB phụ trách)",
-  "group_ho_so_pa/cam_ket": "Biên bản cam kết",
+  "cam_ket": "Biên bản cam kết",
   "cam_ket_ngay": "Ngày cam kết",
   "submission_time": "Thời gian nộp"
 }
