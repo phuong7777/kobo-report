@@ -256,7 +256,14 @@ columns.forEach(col => {
 
 const hidden = hiddenColumns.has(col) ? "hidden-col" : "";
 
-rowHTML += `<td class="${hidden}">${row[col] ?? ""}</td>`;
+let cellValue = row[col] ?? "";
+
+/* ===== xử lý file download ===== */
+if(col.endsWith("_URL") && cellValue){
+cellValue = `<a href="${cellValue}" target="_blank">Download</a>`;
+}
+
+rowHTML += `<td class="${hidden}">${cellValue}</td>`;
 });
 
 rowHTML += "</tr>";
@@ -383,6 +390,7 @@ XLSX.writeFile(workbook, "kobo_report.xlsx");
 
 </body>
 </html>
+
 
 
 
