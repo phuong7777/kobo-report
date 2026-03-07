@@ -23,6 +23,7 @@
   "ho_tro_chuc_vu": "Chức vụ (CB phụ trách)",
   "ho_tro_dien_thoai": "Số điện thoại (CB phụ trách)",
   "cam_ket": "Biên bản cam kết",
+  "cam_ket_URL": "Biên bản cam kết (link)",
   "cam_ket_ngay": "Ngày cam kết",
   "submission_time": "Thời gian nộp"
 }
