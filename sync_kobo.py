@@ -10,47 +10,49 @@ headers = {
     "Authorization": f"Token {API_TOKEN}"
 }
 
-# ======================
-# LẤY DATA TỪ KOBO
-# ======================
+# =====================
+# GET DATA FROM KOBO
+# =====================
 
 url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/?format=json"
 
 response = requests.get(url, headers=headers)
 
 if response.status_code != 200:
-    print("API error:", response.status_code)
+    print("API error", response.status_code)
     exit()
 
 data = response.json()["results"]
 
-# ======================
-# ĐỌC FIELDS
-# ======================
+# =====================
+# LOAD FIELDS
+# =====================
 
 fields_df = pd.read_excel("fields.xlsx")
 fields = fields_df.to_dict(orient="records")
 
-# ====== ĐỌC FILE CHOICES ======
+# =====================
+# LOAD CHOICES
+# =====================
+
 choices_df = pd.read_excel("choices.xlsx")
 
-# Tạo dictionary mapping
 choices_map = {}
 
 for _, row in choices_df.iterrows():
-    var = row["list_name"]
-    val = row["name"]
+
+    list_name = row["list_name"]
+    name = row["name"]
     label = row["label"]
 
-    if var not in choices_map:
-        choices_map[var] = {}
+    if list_name not in choices_map:
+        choices_map[list_name] = {}
 
-    choices_map[var][val] = label
+    choices_map[list_name][name] = label
 
-
-# ======================
-# META COLUMNS
-# ======================
+# =====================
+# META COLUMN
+# =====================
 
 columns_meta = {}
 
@@ -59,9 +61,9 @@ for f in fields:
 
 columns_meta["submission_time"] = "Thời gian nộp"
 
-# ======================
-# XỬ LÝ DATA
-# ======================
+# =====================
+# PROCESS DATA
+# =====================
 
 selected_data = []
 
@@ -78,16 +80,18 @@ for row in data:
 
         value = row.get(field_path)
 
-        # map label choice
+        # ===== MAP LABEL =====
         if field_path in choices_map:
             value = choices_map[field_path].get(value, value)
 
         record[field_output] = value
 
-        # nếu là file thì tạo URL download
-        if value and "." in str(value):
+        # ===== FILE DOWNLOAD =====
+        if value and "." in str(row.get(field_path,"")):
 
-            download_url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/{record_id}/attachments/{value}"
+            filename = row.get(field_path)
+
+            download_url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/{record_id}/attachments/{filename}"
 
             record[field_output + "_URL"] = download_url
 
@@ -95,15 +99,14 @@ for row in data:
 
     selected_data.append(record)
 
-# ======================
-# LƯU FILE
-# ======================
+# =====================
+# SAVE FILE
+# =====================
 
-with open("data.json", "w", encoding="utf-8") as f:
-    json.dump(selected_data, f, ensure_ascii=False, indent=2)
+with open("data.json","w",encoding="utf-8") as f:
+    json.dump(selected_data,f,ensure_ascii=False,indent=2)
 
-with open("columns.json", "w", encoding="utf-8") as f:
-    json.dump(columns_meta, f, ensure_ascii=False, indent=2)
+with open("columns.json","w",encoding="utf-8") as f:
+    json.dump(columns_meta,f,ensure_ascii=False,indent=2)
 
-print("Export data.json success")
-
+print("Export success")
