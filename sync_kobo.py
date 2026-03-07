@@ -10,24 +10,24 @@ headers = {
     "Authorization": f"Token {API_TOKEN}"
 }
 
-# ===== LẤY DATA TỪ KOBO =====
+# ===== LẤY DATA =====
 
-url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/"
+url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/?format=json"
+
 response = requests.get(url, headers=headers)
 
 if response.status_code != 200:
-    print("Lỗi API:", response.status_code)
+    print("API error:", response.status_code)
     exit()
 
 data = response.json()["results"]
 
-# ===== ĐỌC FILE FIELDS =====
+# ===== LOAD FIELDS =====
 
 fields_df = pd.read_excel("fields.xlsx")
-
 fields = fields_df.to_dict(orient="records")
 
-# ===== ĐỌC FILE CHOICES =====
+# ===== LOAD CHOICES =====
 
 choices_df = pd.read_excel("choices.xlsx")
 
@@ -35,16 +35,16 @@ choices_map = {}
 
 for _, row in choices_df.iterrows():
 
-    variable = row["list_name"]
-    value = row["name"]
+    list_name = row["list_name"]
+    name = row["name"]
     label = row["label"]
 
-    if variable not in choices_map:
-        choices_map[variable] = {}
+    if list_name not in choices_map:
+        choices_map[list_name] = {}
 
-    choices_map[variable][value] = label
+    choices_map[list_name][name] = label
 
-# ===== TẠO META COLUMN =====
+# ===== COLUMN META =====
 
 columns_meta = {}
 
@@ -53,27 +53,38 @@ for f in fields:
 
 columns_meta["submission_time"] = "Thời gian nộp"
 
-# ===== XỬ LÝ DATA =====
-
 selected_data = []
+
+# ===== PROCESS RECORDS =====
 
 for row in data:
 
     record = {}
-
     record_id = row["_id"]
 
-    # ===== LẤY ATTACHMENT =====
+    # ===== GET ATTACHMENTS =====
 
-    attach_api = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/{record_id}/attachments/"
-    attach_res = requests.get(attach_api, headers=headers)
+    attach_url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/{record_id}/attachments/"
+
+    attach_res = requests.get(attach_url, headers=headers)
 
     attachments = []
 
     if attach_res.status_code == 200:
         attachments = attach_res.json()["results"]
 
-    # ===== LẤY FIELD =====
+    # map filename -> url
+    file_map = {}
+
+    for a in attachments:
+
+        filename = a.get("filename")
+
+        url = a.get("download_large_url") or a.get("download_medium_url")
+
+        file_map[filename] = url
+
+    # ===== MAP FIELDS =====
 
     for field in fields:
 
@@ -82,36 +93,26 @@ for row in data:
 
         value = row.get(field_path)
 
-        # ===== MAP LABEL =====
-
-        if field_output in choices_map:
-            value = choices_map[field_output].get(value, value)
+        # map label choices
+        if field_path in choices_map:
+            value = choices_map[field_path].get(value, value)
 
         record[field_output] = value
 
-        # ===== FILE ATTACHMENT =====
-
-        for a in attachments:
-
-            if a["filename"] == row.get(field_path):
-
-                record[field_output + "_URL"] = a.get(
-                    "download_large_url",
-                    a.get("download_medium_url")
-                )
+        # if file field
+        if value in file_map:
+            record[field_output + "_URL"] = file_map[value]
 
     record["submission_time"] = row.get("_submission_time")
 
     selected_data.append(record)
 
-# ===== LƯU DATA =====
+# ===== SAVE DATA =====
 
 with open("data.json", "w", encoding="utf-8") as f:
     json.dump(selected_data, f, ensure_ascii=False, indent=2)
 
-# ===== LƯU COLUMN META =====
-
 with open("columns.json", "w", encoding="utf-8") as f:
     json.dump(columns_meta, f, ensure_ascii=False, indent=2)
 
-print("Xuất data.json + columns.json thành công")
+print("Export data.json success")
