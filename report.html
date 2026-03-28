@@ -294,8 +294,9 @@ tableBody.innerHTML = "";
 
 if (filteredData.length === 0) return;
 
-const columns = Object.keys(columnsMeta);
-
+#const columns = Object.keys(columnsMeta);
+const columns = Object.keys(columnsMeta)
+    .filter(col => col !== "submission_time");
 let headerRow = "<tr>";
 
 columns.forEach(col => {
