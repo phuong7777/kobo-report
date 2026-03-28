@@ -14,7 +14,7 @@ headers = {
 # LẤY DATA KOBO
 # =========================
 
-url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/?format=json"
+url = f"https://kf.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/?format=json"
 
 response = requests.get(url, headers=headers)
 
@@ -40,7 +40,6 @@ choices_df = pd.read_excel("choices.xlsx")
 choices_map = {}
 
 for _, row in choices_df.iterrows():
-
     list_name = str(row["list_name"]).strip()
     name = str(row["name"]).strip()
     label = str(row["label"]).strip()
@@ -59,6 +58,7 @@ columns_meta = {}
 for f in fields:
     columns_meta[f["field_output"]] = f["display_name"]
 
+columns_meta["_id"] = "Record ID"
 columns_meta["submission_time"] = "Thời gian nộp"
 
 # =========================
@@ -72,6 +72,8 @@ for row in data:
     record = {}
     record_id = row["_id"]
 
+    record["_id"] = record_id
+
     for field in fields:
 
         field_path = field["field_path"]
@@ -79,22 +81,11 @@ for row in data:
 
         value = row.get(field_path)
 
-        # ===== MAP LABEL =====
-
+        # map label
         if field_output in choices_map:
             value = choices_map[field_output].get(value, value)
 
         record[field_output] = value
-
-        # ===== FILE DOWNLOAD =====
-
-        filename = row.get(field_path)
-
-        if filename and "." in str(filename):
-
-            download_url = f"https://kc.kobotoolbox.org/api/v2/assets/{FORM_UID}/data/{record_id}/attachments/{filename}"
-
-            record[field_output + "_URL"] = download_url
 
     record["submission_time"] = row.get("_submission_time")
 
