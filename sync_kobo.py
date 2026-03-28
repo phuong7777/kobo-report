@@ -56,10 +56,10 @@ for _, row in choices_df.iterrows():
 
 columns_meta = {}
 
-for f in fields:
-    columns_meta[f["field_output"]] = f["display_name"]
-
-columns_meta["submission_time"] = "Thời gian nộp"
+#for f in fields:
+#    columns_meta[f["field_output"]] = f["display_name"]
+#
+#columns_meta["submission_time"] = "Thời gian nộp"
 
 # =========================
 # XỬ LÝ DATA
