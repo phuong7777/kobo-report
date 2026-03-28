@@ -24,6 +24,9 @@
     "ho_tro_dai_dien": "Lương Văn Hùng",
     "ho_tro_chuc_vu": "Trưởng ban xây dựng và cộng đồng",
     "ho_tro_dien_thoai": "983569307",
+    "bk1_test": null,
+    "bk2": null,
+    "bk4": null,
     "submission_time": "2026-02-26T04:54:44"
   },
   {
@@ -50,6 +53,9 @@
     "ho_tro_dai_dien": "Lương Văn Hùng",
     "ho_tro_chuc_vu": "Trưởng ban xây dựng và cộng đồng",
     "ho_tro_dien_thoai": "983569307",
+    "bk1_test": null,
+    "bk2": null,
+    "bk4": null,
     "submission_time": "2026-02-26T05:36:44"
   },
   {
@@ -79,6 +85,9 @@
     "ho_tro_dai_dien": "Lương Văn Hùng",
     "ho_tro_chuc_vu": "Trưởng ban xây dựng và cộng đồng",
     "ho_tro_dien_thoai": "983569307",
+    "bk1_test": null,
+    "bk2": null,
+    "bk4": null,
     "submission_time": "2026-02-26T06:10:22"
   },
   {
@@ -105,6 +114,9 @@
     "ho_tro_dai_dien": null,
     "ho_tro_chuc_vu": null,
     "ho_tro_dien_thoai": null,
+    "bk1_test": null,
+    "bk2": null,
+    "bk4": null,
     "submission_time": "2026-03-28T07:46:51"
   },
   {
@@ -131,6 +143,9 @@
     "ho_tro_dai_dien": null,
     "ho_tro_chuc_vu": null,
     "ho_tro_dien_thoai": null,
+    "bk1_test": null,
+    "bk2": null,
+    "bk4": null,
     "submission_time": "2026-03-28T07:54:05"
   },
   {
@@ -157,6 +172,9 @@
     "ho_tro_dai_dien": null,
     "ho_tro_chuc_vu": null,
     "ho_tro_dien_thoai": null,
+    "bk1_test": null,
+    "bk2": null,
+    "bk4": null,
     "submission_time": "2026-03-28T08:01:47"
   },
   {
@@ -183,6 +201,9 @@
     "ho_tro_dai_dien": null,
     "ho_tro_chuc_vu": null,
     "ho_tro_dien_thoai": null,
+    "bk1_test": "option_2",
+    "bk2": null,
+    "bk4": null,
     "submission_time": "2026-03-28T08:07:00"
   },
   {
@@ -209,6 +230,9 @@
     "ho_tro_dai_dien": null,
     "ho_tro_chuc_vu": null,
     "ho_tro_dien_thoai": null,
+    "bk1_test": "option_2",
+    "bk2": null,
+    "bk4": null,
     "submission_time": "2026-03-28T08:10:26"
   },
   {
@@ -235,6 +259,9 @@
     "ho_tro_dai_dien": null,
     "ho_tro_chuc_vu": null,
     "ho_tro_dien_thoai": null,
+    "bk1_test": null,
+    "bk2": null,
+    "bk4": null,
     "submission_time": "2026-03-28T08:15:19"
   },
   {
@@ -261,6 +288,9 @@
     "ho_tro_dai_dien": null,
     "ho_tro_chuc_vu": null,
     "ho_tro_dien_thoai": null,
+    "bk1_test": null,
+    "bk2": null,
+    "bk4": "option_2",
     "submission_time": "2026-03-28T08:15:43"
   },
   {
@@ -287,6 +317,9 @@
     "ho_tro_dai_dien": null,
     "ho_tro_chuc_vu": null,
     "ho_tro_dien_thoai": null,
+    "bk1_test": null,
+    "bk2": "option_2",
+    "bk4": "option_2",
     "submission_time": "2026-03-28T08:20:18"
   }
 ]
