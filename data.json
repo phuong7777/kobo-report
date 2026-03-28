@@ -1,5 +1,6 @@
 [
   {
+    "_id": 680566131,
     "id_ho_so": "1",
     "khu_vuc_nat": "NAT Miền Bắc",
     "tinh_tp": "Quảng Ninh",
@@ -12,7 +13,6 @@
     "chuho_dien_thoai": "1638153453",
     "chuho_cmnd": "1534534534",
     "hoan_canh": "Hộ cận nghèo, chồng bị đột tử mất. Làm giúp việc (3,5 triệu/tháng). Con trai lớn tốt nghiệp THPT đi làm công nhân may trong Tp. HCM nhưng bị tai biến nên về quê học nghề. Không có đất sản xuất, không chăn nuôi do không có thời gian.",
-    "hoan_canh_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680566131/attachments/Hộ cận nghèo, chồng bị đột tử mất. Làm giúp việc (3,5 triệu/tháng). Con trai lớn tốt nghiệp THPT đi làm công nhân may trong Tp. HCM nhưng bị tai biến nên về quê học nghề. Không có đất sản xuất, không chăn nuôi do không có thời gian.",
     "dac_diem_thien_tai": "Lũ 1,5m tính từ đất (2020)",
     "thiet_hai_gan_nhat": "Bay tôn",
     "phuong_an": "Xây mới một bên nhà cũ",
@@ -25,12 +25,11 @@
     "ho_tro_chuc_vu": "Trưởng ban xây dựng và cộng đồng",
     "ho_tro_dien_thoai": "983569307",
     "cam_ket": "ckxd-12_3_59.pdf",
-    "cam_ket_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680566131/attachments/ckxd-12_3_59.pdf",
     "BB_giao_tien_1": "bbbgkp-11_54_23.pdf",
-    "BB_giao_tien_1_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680566131/attachments/bbbgkp-11_54_23.pdf",
     "submission_time": "2026-02-26T04:54:44"
   },
   {
+    "_id": 680597019,
     "id_ho_so": "2",
     "khu_vuc_nat": "NAT Miền Trung",
     "tinh_tp": "Khánh Hòa",
@@ -55,12 +54,11 @@
     "ho_tro_chuc_vu": "Trưởng ban xây dựng và cộng đồng",
     "ho_tro_dien_thoai": "983569307",
     "cam_ket": "ckxd dtl-12_33_2.pdf",
-    "cam_ket_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680597019/attachments/ckxd dtl-12_33_2.pdf",
     "BB_giao_tien_1": "kpht dtl-12_33_12.pdf",
-    "BB_giao_tien_1_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680597019/attachments/kpht dtl-12_33_12.pdf",
     "submission_time": "2026-02-26T05:36:44"
   },
   {
+    "_id": 680625191,
     "id_ho_so": "3",
     "khu_vuc_nat": "NAT Miền Tây",
     "tinh_tp": "An Giang",
@@ -73,11 +71,8 @@
     "chuho_dien_thoai": "3574343322",
     "chuho_cmnd": "100842305",
     "hoan_canh": "Hộ cần nghèo. Hai vợ chồng trẻ đi bán cá viên chiên, 26 ngày/tháng (200.000/ngày, thu nhập khoảng hơn 5 triệu/tháng). Mùa gần Tết chồng đi làm hoa trong Lâm Đồng 3 tháng (9 triệu/tháng). Không chăn nuôi, không có đất sản xuất.",
-    "hoan_canh_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680625191/attachments/Hộ cần nghèo. Hai vợ chồng trẻ đi bán cá viên chiên, 26 ngày/tháng (200.000/ngày, thu nhập khoảng hơn 5 triệu/tháng). Mùa gần Tết chồng đi làm hoa trong Lâm Đồng 3 tháng (9 triệu/tháng). Không chăn nuôi, không có đất sản xuất.",
     "dac_diem_thien_tai": "Lũ 1m tính từ đất (2020). Nhà gần sông nhỏ",
-    "dac_diem_thien_tai_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680625191/attachments/Lũ 1m tính từ đất (2020). Nhà gần sông nhỏ",
     "thiet_hai_gan_nhat": "Hư hỏng đồ đạc, vật dụng trong nhà.",
-    "thiet_hai_gan_nhat_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680625191/attachments/Hư hỏng đồ đạc, vật dụng trong nhà.",
     "phuong_an": "Cải tạo nhà hiện trạng thành nhà tránh lũ",
     "muc_ho_tro": "70000000",
     "tinh_trang_ho_so": "Hủy",
@@ -88,7 +83,6 @@
     "ho_tro_chuc_vu": "Trưởng ban xây dựng và cộng đồng",
     "ho_tro_dien_thoai": "983569307",
     "cam_ket": "ckxd-13_15_15.pdf",
-    "cam_ket_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680625191/attachments/ckxd-13_15_15.pdf",
     "BB_giao_tien_1": null,
     "submission_time": "2026-02-26T06:10:22"
   }
