@@ -8,30 +8,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-body { font-family: 'Segoe UI', Arial; background:#f4f6f9; padding:20px; }
-.card { background:white; padding:15px 20px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1); display:inline-block; margin-bottom:20px; }
-.controls { background:white; padding:15px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1); margin-bottom:15px; }
-button { cursor:pointer; background:#4CAF50; color:white; border:none; border-radius:4px; padding:6px; }
-table { border-collapse: collapse; width:100%; background:white; }
-th, td { border:1px solid #eee; padding:6px; font-size:13px; }
-.hidden-col { display:none; }
+body { font-family: Arial; padding:20px; background:#f4f6f9; }
+table { width:100%; border-collapse:collapse; background:white; }
+th, td { border:1px solid #ddd; padding:6px; }
+button { padding:4px 6px; margin:2px; cursor:pointer; }
 </style>
 
 </head>
 
 <body>
 
-<h2>DỰ ÁN DATA NHÀ CHỐNG LŨ</h2>
+<h2>DỰ ÁN DATA</h2>
 
-<div class="card">
-    <h3>Tổng hồ sơ</h3>
-    <div id="totalCount">0</div>
-</div>
-
-<div class="controls">
-<input type="text" id="searchInput" placeholder="Tìm kiếm...">
-<button onclick="resetFilter()">Reset</button>
-</div>
+<div>Tổng hồ sơ: <span id="totalCount">0</span></div>
 
 <table>
 <thead id="tableHead"></thead>
@@ -41,29 +30,42 @@ th, td { border:1px solid #eee; padding:6px; font-size:13px; }
 <script>
 
 let fullData = [];
-let filteredData = [];
 let columnsMeta = {};
-let currentPage = 1;
 
 Promise.all([
 fetch("data.json").then(res => res.json()),
 fetch("columns.json").then(res => res.json())
 ]).then(([data, meta]) => {
+
+console.log("DATA:", data); // DEBUG
+
 fullData = data;
-filteredData = data;
 columnsMeta = meta;
+
+document.getElementById("totalCount").innerText = data.length;
+
 renderTable();
+
+}).catch(err => {
+console.error("LOAD ERROR:", err);
 });
 
 function renderTable() {
 
+const tableHead = document.getElementById("tableHead");
+const tableBody = document.getElementById("tableBody");
+
 tableHead.innerHTML = "";
 tableBody.innerHTML = "";
 
-if (!filteredData.length) return;
+if (!fullData.length) {
+tableBody.innerHTML = "<tr><td>Không có dữ liệu</td></tr>";
+return;
+}
 
 const columns = Object.keys(columnsMeta);
 
+// HEADER
 let headerRow = "<tr>";
 columns.forEach(col => {
 headerRow += `<th>${columnsMeta[col]}</th>`;
@@ -71,7 +73,8 @@ headerRow += `<th>${columnsMeta[col]}</th>`;
 headerRow += "</tr>";
 tableHead.innerHTML = headerRow;
 
-filteredData.forEach(row => {
+// BODY
+fullData.forEach(row => {
 
 let rowHTML = "<tr>";
 
@@ -86,7 +89,7 @@ if (fileFields.includes(col)) {
     const attachmentId = row[col];
     const recordId = row["_id"];
 
-    if (attachmentId) {
+    if (attachmentId && recordId) {
 
         const fileUrl = `/file?attachment_id=${attachmentId}&record_id=${recordId}`;
 
@@ -101,7 +104,7 @@ if (fileFields.includes(col)) {
     }
 }
 
-rowHTML += `<td>${value}</td>`;   // ✅ FIX QUAN TRỌNG
+rowHTML += `<td>${value}</td>`;
 
 });
 
@@ -112,6 +115,7 @@ tableBody.innerHTML += rowHTML;
 
 }
 
+// PREVIEW
 function previewFile(url) {
 document.getElementById("previewFrame").src = url;
 document.getElementById("previewModal").style.display = "flex";
