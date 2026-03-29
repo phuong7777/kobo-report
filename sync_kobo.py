@@ -96,7 +96,7 @@ for row in data:
 
             record[field_output + "_URL"] = download_url
 
-    record["submission_time"] = row.get("_submission_time")
+    #record["submission_time"] = row.get("_submission_time")
 
     selected_data.append(record)
 
