@@ -27,8 +27,7 @@
     "cam_ket": "ckxd-12_3_59.pdf",
     "cam_ket_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680566131/attachments/ckxd-12_3_59.pdf",
     "BB_giao_tien_1": "bbbgkp-11_54_23.pdf",
-    "BB_giao_tien_1_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680566131/attachments/bbbgkp-11_54_23.pdf",
-    "submission_time": "2026-02-26T04:54:44"
+    "BB_giao_tien_1_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680566131/attachments/bbbgkp-11_54_23.pdf"
   },
   {
     "id_ho_so": "2",
@@ -57,8 +56,7 @@
     "cam_ket": "ckxd dtl-12_33_2.pdf",
     "cam_ket_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680597019/attachments/ckxd dtl-12_33_2.pdf",
     "BB_giao_tien_1": "kpht dtl-12_33_12.pdf",
-    "BB_giao_tien_1_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680597019/attachments/kpht dtl-12_33_12.pdf",
-    "submission_time": "2026-02-26T05:36:44"
+    "BB_giao_tien_1_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680597019/attachments/kpht dtl-12_33_12.pdf"
   },
   {
     "id_ho_so": "3",
@@ -89,7 +87,6 @@
     "ho_tro_dien_thoai": "983569307",
     "cam_ket": "ckxd-13_15_15.pdf",
     "cam_ket_URL": "https://kc.kobotoolbox.org/api/v2/assets/aDtzYakH7kU6dp7eXncupi/data/680625191/attachments/ckxd-13_15_15.pdf",
-    "BB_giao_tien_1": null,
-    "submission_time": "2026-02-26T06:10:22"
+    "BB_giao_tien_1": null
   }
 ]
